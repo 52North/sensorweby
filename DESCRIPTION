@@ -8,12 +8,13 @@ Authors@R: c(person("Christian", "Autermann", email =
     comment = "This package is part of a managed codebase.") )
 Description: A JavaScript sensor web client with graphs and analytics powered
     by Shiny.
-Depends:
+Depends: 
     R (>= 3.1.1)
 License: GPL-2
 LazyData: true
 URL: https://github.com/52North/sensorweby
 BugReports: https://github.com/52North/sensorweby/issues
-Imports:
+Imports: 
     shiny,
-    futile.logger
+    futile.logger,
+    openair
