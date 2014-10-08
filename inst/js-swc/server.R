@@ -33,7 +33,7 @@ formatTime <- function(x) {
 
 shinyServer(function(input, output) {
     
-    if(requireNamespace(openair))
+    if(requireNamespace("openair"))
         stop("openair required to run this app. Please install.", call. = FALSE)
     
     output$begin <- renderText({
@@ -58,7 +58,7 @@ shinyServer(function(input, output) {
                             SO2="so2",
                             CO="co",
                             PM25="pm25");
-        pollutionRose(mydata, pollutant = pollutant, year = 2001);
+        openair::pollutionRose(mydata, pollutant = pollutant, year = 2001);
     });
 
 });
