@@ -21,6 +21,19 @@ git clone https://github.com/52North/sensorweby
 R CMD INSTALL sensorweby
 ```
 
+## Running 
+
+The `sensorweby` package only has one function to start the interactive web client:
+
+```
+library(sensorweby)
+run()
+```
+
+To close the client interrupt R, usually by hitting Esc or Ctrl + C.
+
+For more information about running Shiny apps on the server see the [Shiny documentation](http://shiny.rstudio.com/).
+
 ## Developer Documentation
 
 ...
