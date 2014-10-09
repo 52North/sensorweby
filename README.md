@@ -34,6 +34,11 @@ To close the client interrupt R, usually by hitting Esc or Ctrl + C.
 
 For more information about running Shiny apps on the server see the [Shiny documentation](http://shiny.rstudio.com/).
 
+## Configuration
+
+You can configure the application by passing a configuration file in YAML format to the function `run(..)`. The default configuration files is at `js-swc/settings.yml`.
+
+
 ## Developer Documentation
 
 ...

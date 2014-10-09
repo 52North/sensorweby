@@ -27,14 +27,21 @@
 #
 
 
+library("openair")
+
 formatTime <- function(x) {
     if (is.null(x) || is.na(x)) x else format(x, "%Y-%m-%dT%H:%M:%OS3")
 }
 
-shinyServer(function(input, output) {
+# TODO load distance matching table here
+
+
+# function is called once each session
+shinyServer(func = function(input, output, session) {
+    futile.logger::flog.debug("New session at server.") # is false: %s", toString(serverInfo()))
     
-    if(requireNamespace("openair"))
-        stop("openair required to run this app. Please install.", call. = FALSE)
+    # only works in reactive environment..
+    #futile.logger::flog.debug("New session: %s", toString(paste(names(as.list(session$clientData)), as.list(session$clientData), sep = ": ")))
     
     output$begin <- renderText({
         formatTime(input$begin);
@@ -50,6 +57,8 @@ shinyServer(function(input, output) {
     });
     
     output$pollutionRose <- renderPlot({
+        futile.logger::flog.trace("Rendering plot for %s", input$pollutant)
+        
         pollutant <- switch(input$pollutant, 
                             NOX="nox",
                             NO2="no2",

@@ -6,6 +6,10 @@ Authors@R: c(person("Christian", "Autermann", email =
     email = "d.nuest@52north.org", role = c("aut", "cre")),
     person("52\u00b0North", email = "info@52north.org", role = c("cph"),
     comment = "This package is part of a managed codebase.") )
+AuthorUrl: http://52north.org/
+DisplayMode: normal
+Type: Shiny
+Tags: sensor web, sensor data, sensors, analysis, processing
 Description: A JavaScript sensor web client with graphs and analytics powered
     by Shiny.
 Depends: 
@@ -17,4 +21,5 @@ BugReports: https://github.com/52North/sensorweby/issues
 Imports: 
     shiny,
     futile.logger,
-    openair
+    openair,
+    yaml
