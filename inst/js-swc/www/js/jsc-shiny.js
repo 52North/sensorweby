@@ -205,7 +205,7 @@ $(function() {
 
     Pages.toggleAnalysisSidebar = function(active) {
       var $pane = $("#analysis-sidebar"),
-          $btn = $('[data-toggle="#analysis-sidebar"');
+          $btn = $('[data-toggle="#analysis-sidebar"]');
       if (active === undefined) {
         active = !$pane.hasClass("active");
       }

@@ -27,7 +27,7 @@
 #
 
 
-source("swc.R")
+source("swc.R", local = TRUE)
 
 shinyUI(
   swcPage(
