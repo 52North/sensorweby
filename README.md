@@ -41,7 +41,21 @@ You can configure the application by passing a configuration file in YAML format
 
 ## Developer Documentation
 
-...
+### Updating the JS SensorWebClient
+
+To install the latest tag just run:
+
+```
+installSensorWebClient()
+```
+
+To install your own fork:
+
+```
+installSensorWebClient(owner = 'myusername', version = 'mybranch')
+```
+
+Both commands require the packages `RCurl` and [`github`](https://github.com/cscheid/rgithub) to be installed. Also [Maven](http://maven.apache.org/) has to be included in your `PATH`.
 
 ## Contact / Support
 
