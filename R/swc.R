@@ -85,7 +85,7 @@ getLatestSensorWebClientTag <- function(owner = '52North', repo = 'js-sensorweb-
 
 .extractSensorWebClientZipFile <- function(zipFile, tmpDir) {
     base <- unzip(zipFile, list = TRUE)$Name[1]
-    futile.logger::flog.trace("Extracting %s to %s", file.path(tmpDir, base));
+    futile.logger::flog.trace("Extracting %s to %s", zipFile, tmpDir);
     unzip(zipFile, exdir = tmpDir)
     return(normalizePath(file.path(tmpDir, base)))
 }
