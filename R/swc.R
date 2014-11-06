@@ -200,6 +200,10 @@ swcPage <- function(...,
       src="shared/selectize/js/selectize.min.js"
     ),
     tags$script(
+        type="text/javascript",
+        src="js/isTouchOrIsMobile.js"
+    ),
+    tags$script(
       type="text/javascript",
       src="js/jsc-0.2.0.deps.min.js"
     ),
@@ -339,6 +343,8 @@ installSensorWebClient <- function(owner = '52North', repo = 'js-sensorweb-clien
     .replaceExistingSensorWebClientInstallation(distFile, tmpDir, swcDir)
 
     file.copy(from = file.path(basePath, 'inst', 'jsc-shiny.js'),
+              to = file.path(swcDir, 'www', 'js'))
+    file.copy(from = file.path(basePath, 'inst', 'isTouchOrIsMobile.js'),
               to = file.path(swcDir, 'www', 'js'))
 
     futile.logger::flog.trace("Deleting %s", tmpDir)
