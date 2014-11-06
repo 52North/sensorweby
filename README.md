@@ -38,6 +38,139 @@ For more information about running Shiny apps on the server see the [Shiny docum
 
 You can configure the application by passing a configuration file in YAML format to the function `run(..)`. The default configuration files is at `js-swc/settings.yml`.
 
+### Interface Builder Functions
+
+
+#### Begin Time Input
+
+`swcTimeBeginInput` adds a new reactive input that contains the currently selected start time (as a `POSIXct`) of the JavaScript SensorWebClient. Returns a HTML `input` tag.
+
+| Parameter | Description         |
+|-----------|---------------------|
+| `id `     | the id of the input |
+
+##### Example
+
+```r
+swcTimeBeginInput('begin')
+
+```
+
+#### End Time Input
+
+`swcTimeEndInput` adds a new reactive input that contains the currently
+selected end time (as a `POSIXct`) of the JavaScript SensorWebClient.
+Returns a HTML `input` tag.
+
+| Parameter | Description         |
+|-----------|---------------------|
+| `id `     | the id of the input |
+
+##### Example
+
+```r
+swcTimeEndInput('end')
+
+```
+
+#### Timeseries Input
+
+`swcTimeseriesInput` adds a new reactive input that contains a list identifiers of the currently selected time series of the JavaScript SensorWebClient. Returns a HTML `input` tag.
+
+| Parameter | Description         |
+|-----------|---------------------|
+| `id `     | the id of the input |
+
+##### Example
+
+```r
+swcTimeseriesInput('series')
+
+```
+
+#### I18N Definition
+
+`swcI18N` adds a new I18N value to the JavaScript SensorWebClient. Returns a HTML `script` tag setting the value.
+
+| Parameter | Description             |
+|-----------|-------------------------|
+| `lang`    | the language identifier |
+| `key`     | the message key         |
+| `value`   | the message value       |
+
+##### Example
+
+```r
+
+swcI18N('eng', 'button_label', 'OK')
+
+```
+
+#### Left Panel Definition
+
+`swcLeftPanel` creates the left panel of the analysis view of the JavaScript SensorWebClient. Returns a HTML `div` tag for the left panel.
+
+| Parameter   | Description                                         |
+|-------------|-----------------------------------------------------|
+| `...`       | inherited from `shiny::tags$div`                    |
+
+##### Example
+
+```r
+swcLeftPanel(
+	plotOutput("output", width="100%", height="100%")
+)
+
+```
+
+#### Right Panel Definition
+
+`swcLeftPanel` creates the right panel of the analysis view of the JavaScript SensorWebClient. Returns a HTML `div` tag for the right panel.
+
+| Parameter   | Description                                         |
+|-------------|-----------------------------------------------------|
+| `header`    | the header of the right panel                       |
+| `...`       | inherited from `shiny::tags$div`                    |
+
+##### Example
+
+```r
+swcRightPanel(
+	header="Parameters",
+	selectInput(
+ 		"pollutant",
+ 		label="Pollutant",
+		choices = c("NOX", "NO2", "O3", "PM10", "SO2", "CO", "PM25"),
+ 		selected = "NOX"
+	),
+	swcTimeBeginInput("begin"),
+	swcTimeEndInput("end"),
+	swcTimeseriesInput("series"),
+)
+
+```
+
+#### JavaScript SensorWebClient Page Definition
+
+`swcPage` creates a new page containing the JavaScript SensorWebClient. Returns a HTML `html` tag containing the client.
+
+| Parameter     | Description                                         |
+|---------------|-----------------------------------------------------|
+| `title`       | the title of the page                               |
+| `author`      | the HTML `meta` tag author                          |
+| `description` | the HTML `meta` tag description                     |
+| `debug`       | indicates if the client should be run in debug mode |
+| `...`         | inherited from `shiny::tags$div`                    |
+
+##### Example
+
+```r
+swcPage(
+	swcLeftPanel(...),
+	swcRightPanel(...)
+)
+
+```
 
 ## Developer Documentation
 

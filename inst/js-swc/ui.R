@@ -26,9 +26,6 @@
 # Public License for more details.
 #
 
-
-source("swc.R", local = TRUE)
-
 shinyUI(
   swcPage(
     title="Shiny Sensor Web Client",
