@@ -38,13 +38,14 @@
 installSensorWebClient <- function(owner = '52North', repo = 'js-sensorweb-client',
                                    version = getLatestSensorWebClientTag()) {
     basePath <- devtools::as.package('.')$path
-    tmpDir <- tempdir()
+    tmpDir <- tempfile(pattern = 'swc-temp-dir')
+    dir.create(tmpDir, recursive=TRUE)
     swcDir <- file.path(basePath, 'inst', 'js-swc')
-    
+
     zipFile <- .downloadSensorWebClientZipFile(owner, repo, version, tmpDir)
     projectDir <- .extractSensorWebClientZipFile(zipFile, tmpDir)
     distFile <- .buildSensorWebClient(projectDir, tmpDir)
-    
+
     .replaceExistingSensorWebClientInstallation(distFile, tmpDir, swcDir)
     
     futile.logger::flog.trace("Deleting %s", tmpDir)
