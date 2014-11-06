@@ -3,7 +3,7 @@
 \alias{run}
 \title{Run shiny sensor web client}
 \usage{
-run()
+run(configFile = "js-swc/settings.yml")
 }
 \description{
 \code{run} starts the Shiny application with an advanced JavaScript sensor web client
