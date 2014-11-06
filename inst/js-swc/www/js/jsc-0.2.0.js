@@ -22,7 +22,7 @@ var Permalink = {
         for (var i = 0; i < parameters.length; i++) {
             var sParameterName = parameters[i].split('=');
             if (sParameterName[0] == sParam) {
-                return sParameterName[1];
+                return decodeURIComponent(sParameterName[1]);
             }
         }
     }
@@ -59,12 +59,21 @@ function readI18n(lang, key) {
     try {
         var keyArray = key.split('.');
         var value = i18n[lang];
+        if ( !value) {
+            var langParts = lang.split('-');
+            // convert lang to 'en_US' as 'en-US' not allowed
+            var value = i18n[langParts[0] + "_" + langParts[1]];
+            if ( !value && langParts.length > 1) {
+                // no subregion, try e.g. en-US => en
+                value = i18n[langParts[0]];
+            }
+        }
         while (keyArray.length) {
             var property = keyArray.splice(0, 1);
             value = read_prop(value, property[0]);
         }
         if ($.isEmptyObject(value)) {
-            console.error("Don't find the i18n key '" + key + "' for language " + lang);
+            console.error("Missing i18n key '" + key + "' for language " + lang);
         }
         return value;
     } catch (ex) {
@@ -100,10 +109,242 @@ i18n.en = {
         stationSelection: 'Select a station',
         chartView: 'Chart view',
         phenomena: 'Phenomena',
-        phenomenon: 'Phenomenon'
+        phenomenon: 'Phenomenon',
+        favoritesList: 'Favorites',
+        importFavorites: 'Import',
+        exportFavorites: 'Export',
+        importExportHelp: 'Choose a file to import or export favorites',
+        noFileSelected: 'No file selected'
     },
     chart: {
-        noTimeseriesSelected: 'You have selected no timeseries or the selected timeseries have no values in the given time range.'
+        noTimeseriesSelected: 'You have selected no timeseries or the selected timeseries have no values in the given time range.',
+        outsideOfDataRange: 'Outside of data range!'
+    },
+    map: {
+        userLocation: 'Here is your current location',
+        stationSelection: {
+            station: 'Station',
+            selectAllTimeseries: 'select all timeseries'
+        },
+        stationLocation: {
+            station: 'Station',
+            timeseries: 'Timeseries',
+            provider: 'Provider'
+        },
+        providerList: {
+            provider: 'Provider',
+            stations: 'Stations',
+            timeseries: 'Timeseries',
+            phenomena: 'Phenomena'
+        },
+        search: {
+            label: 'search for address ...',
+            noResult: 'Sorry, that address could not be found.'
+        }
+    },
+    listSelection: {
+        header: 'Select timeseries by list',
+        headers: {
+            category: 'Category',
+            station: 'Station',
+            phenomenon: 'Phenomenon',
+            procedure: 'Sensor'
+        },
+        warning: {
+            moreThanOneTimeseries: 'found more than one timeseries'
+        }
+    },
+    legend: {
+        entry: {
+            noData: 'no Data available',
+            jumpToLastValue: 'jump to last value',
+            firstValueAt: 'First value at',
+            lastValueAt: 'Last value at'
+        }
+    },
+    "export": {
+        label: 'get data as CSV-File'
+    },
+    timeSelection: {
+        header: 'Time Range',
+        presetsHeader: 'presets',
+        presets: {
+            lastHour: 'last hour',
+            today: 'today',
+            yesterday: 'yesterday',
+            todayYesterday: 'today & yesterday',
+            thisWeek: 'this week',
+            lastWeek: 'last week',
+            thisMonth: 'this month',
+            lastMonth: 'last month',
+            thisYear: 'this year',
+            lastYear: 'last year'
+        },
+        custom: {
+            header: 'custom',
+            start: 'Start date',
+            end: 'End date'
+        },
+        warning: {
+            startBeforeEnd: 'The start date can not be greater then the end date',
+            maxTimeRange: 'The time range can not be greater then one year'
+        }
+    },
+    styleChange: {
+        header: 'Change style',
+        currentColor: 'Current color',
+        selectColor: 'Select a new color',
+        selectBarInterval: 'Select the bar interval',
+        barChartInterval: {
+            hour: 'Hour',
+            day: 'Day',
+            week: 'Week',
+            month: 'Month'
+        },
+        zeroScaled: 'zero scaled Y-axis',
+        groupedAxis: 'grouped axis'
+    },
+    settings: {
+        header: 'Settings',
+        resetStatus: 'Reset status',
+        permalink: {
+            create: 'Create a permalink as',
+            inWindow: 'link in a new window',
+            inMail: 'link in an email',
+            inClipboard: 'Link to clipboard',
+            clipboardInfo: 'Copy to clipboard: Ctrl+C, Enter',
+            inQrCode: 'as QR-Code',
+            favorite: 'Status as favorite entry'
+        },
+        clusterMarker: 'cluster marker',
+        markerWithLastInfo: {
+            header: 'marker with last value information',
+            label: 'attention - some data provider are very slow'
+        },
+        saveStatus: 'save status',
+        generalizeData: 'generalize Data',
+        imprint: {
+            header: 'Imprint',
+            github: 'Find this project at <a href="https://github.com/52North/js-sensorweb-client" target="_blank">GitHub</a>',
+            text: '<p><a href="http://52north.org" target="_blank">52&deg;North GmbH</a> is responsible for this website.</p><p>52&deg;North Initiative for Geospatial Open Source Software GmbH<br>Martin-Luther-King-Weg 24<br>48155 Muenster, Germany</p>'
+        }
+    },
+    permalink: {
+        noMatchingTimeseriesFound: 'No matching timeseries is found.'
+    },
+    guide: {
+        step1: {
+            header: 'JavaScript Client - Guided Tour',
+            text: 'This tour gives in a few steps an overview how to use this client. First we add a timeseries from the map.'
+        },
+        step2: {
+            header: 'Go to the map',
+            text: 'Here we switch the view to get a map.'
+        },
+        step3: {
+            header: 'Map view',
+            text: 'This is the map view. In the map you can see markers or markergroups.'
+        },
+        step4: {
+            header: 'Change Provider',
+            text: 'Here you can select another timeseries provider.'
+        },
+        step5: {
+            header: 'Show location',
+            text: 'And here you can locate your device on the map.'
+        },
+        step6: {
+            header: 'List selection',
+            text: 'Here you can select a timeseries out of ordered lists.'
+        },
+        step7: {
+            header: 'Select a station',
+            text: 'Please select now a station on the map.'
+        },
+        step8: {
+            header: 'Select timeseries',
+            text: 'Select this checkbox. If there is only one timeseries for this station, the checkbox is already checked. Now you can go on with the "OK" button to load the timeseries.'
+        },
+        step9: {
+            header: 'Legend entry',
+            text: 'Here you see the added time series. You can delete or locate the time series or change the color.'
+        },
+        step10: {
+            header: 'Chart',
+            text: 'This is the chart of the selected time series.'
+        },
+        step11: {
+            header: 'Change time',
+            text: 'Here you can change the time extent for your selected time series.'
+        },
+        step12: {
+            header: 'Table View',
+            text: 'Here you get a table of the raw data values to your selected time series.'
+        },
+        step13: {
+            header: 'Favorite management',
+            text: 'The legend entries/timeseries could be saved as favorites. In this view all favorites are listed and could be maintained.'
+        },
+        step14: {
+            header: 'Finished',
+            text: 'Well done!<br> This client is a product of <a href="http://52north.org" target="_blank">52&deg;North GmbH</a>. You can find the source code on <a href="https://github.com/52North/js-sensorweb-client" target="_blank">GitHub</a>.'
+        }
+    },
+    favorite: {
+        firstValueAt: 'First value at',
+        lastValueAt: 'Last value at',
+        edit: {
+            header: "Edit favorite"
+        },
+        group: {
+            add: "The status '{0}' is added to the favorite list.",
+            exists: "This status still exists.",
+            noTimeseries: "Currently no timeseries are selected.",
+            notSupported: "The provider of an entry of the status '{0}' isn't supported and can't be loaded."
+        },
+        single: {
+            add: "A new favorite '{0}' is added to the list.",
+            remove: "The favorite '{0}' is removed.",
+            exists: "This favorite still exists.",
+            notSupported: "The provider of the favorite '{0}' isn't supported and can't be loaded."
+        }
+    },
+    inform: {
+        error: "An error occured: ",
+        warn: "Please remember that: "
+    }
+};/*
+ * Copyright (C) 2014-2014 52°North Initiative for Geospatial Open Source
+ * Software GmbH
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+i18n.en_GB = {
+    ok: 'OK',
+    main: {
+        legend: 'Legend',
+        diagram: 'Diagram',
+        mapView: 'Map view',
+        settings: 'Settings',
+        stationSelection: 'Select a station',
+        chartView: 'Chart view',
+        phenomena: 'Phenomena',
+        phenomenon: 'Phenomenon',
+        favoritesList: 'Favourites'
+    },
+    chart: {
+        noTimeseriesSelected: 'You have selected no timeseries or the selected timeseries have no values in the given time range.',
+        outsideOfDataRange: 'Outside of data range!'
     },
     map: {
         userLocation: 'Here is your current location',
@@ -197,7 +438,8 @@ i18n.en = {
             inMail: 'link in an email',
             inClipboard: 'Link to clipboard',
             clipboardInfo: 'Copy to clipboard: Ctrl+C, Enter',
-            inQrCode: 'as QR-Code'
+            inQrCode: 'as QR-Code',
+            favorite: 'Status as favourite entry'
         },
         clusterMarker: 'cluster marker',
         markerWithLastInfo: {
@@ -265,9 +507,36 @@ i18n.en = {
             text: 'Here you get a table of the raw data values to your selected time series.'
         },
         step13: {
+            header: 'Favourite management',
+            text: 'The legend entries/timeseries could be saved as favourites. In this view all favourites are listed and could be maintained.'
+        },
+        step14: {
             header: 'Finished',
             text: 'Well done!<br> This client is a product of <a href="http://52north.org" target="_blank">52&deg;North GmbH</a>. You can find the source code on <a href="https://github.com/52North/js-sensorweb-client" target="_blank">GitHub</a>.'
         }
+    },
+    favorite: {
+        firstValueAt: 'First value at',
+        lastValueAt: 'Last value at',
+        edit: {
+            header: "Edit favourite"
+        },
+        group: {
+            add: "The status '{0}' is added to the favourite list.",
+            exists: "This status still exists.",
+            noTimeseries: "Currently no timeseries are selected.",
+            notSupported: "The provider of an entry of the status '{0}' isn't supported and can't be loaded."
+        },
+        single: {
+            add: "A new favourite '{0}' is added to the list.",
+            remove: "The favourite '{0}' is removed.",
+            exists: "This favourite still exists.",
+            notSupported: "The provider of the favourite '{0}' isn't supported and can't be loaded."
+        }
+    },
+    inform: {
+        error: "An error occured: ",
+        warn: "Please remember that: "
     }
 };/*
  * Copyright (C) 2014-2014 52°North Initiative for Geospatial Open Source
@@ -295,10 +564,16 @@ i18n.de = {
         stationSelection: 'Wähle eine Station aus',
         chartView: 'Diagrammansicht',
         phenomena: 'Phänomene',
-        phenomenon: 'Phänomen'
+        phenomenon: 'Phänomen',
+        favoritesList: 'Favoriten',
+        importFavorites: 'Importieren',
+        exportFavorites: 'Exportieren',
+        importExportHelp: 'Datei für den Im- oder Exportieren wählen',
+        noFileSelected: 'Keine Datei ausgewählt'
     },
     chart: {
-        noTimeseriesSelected: 'Sie haben keine Zeitreihe ausgewählt oder die gewählten Zeitreihen haben keine Werte in dem derzeitigen Zeitraum.'
+        noTimeseriesSelected: 'Sie haben keine Zeitreihe ausgewählt oder die gewählten Zeitreihen haben keine Werte in dem derzeitigen Zeitraum.',
+        outsideOfDataRange: 'Außerhalb des Datenbereichs!'
     },
     map: {
         userLocation: 'Hier ist ihr Standort',
@@ -349,6 +624,7 @@ i18n.de = {
         header: 'Zeitraum',
         presetsHeader: 'Vordefiniert',
         presets: {
+            lastHour: 'letzte Stunde',
             today: 'heute',
             yesterday: 'gestern',
             todayYesterday: 'heute & gestern',
@@ -392,7 +668,8 @@ i18n.de = {
             inMail: 'öffnen in leerer Mail',
             inClipboard: 'Link in die Zwischenablage',
             clipboardInfo: 'Kopiere in die Zwischenablage: Ctrl+C, Enter',
-            inQrCode: 'als QR-Code'
+            inQrCode: 'als QR-Code',
+            favorite: 'Status in die Favoritenliste übernehmen'
         },
         clusterMarker: 'Marker gruppieren',
         markerWithLastInfo: {
@@ -460,9 +737,36 @@ i18n.de = {
             text: 'Hier bekommt man die Rohdaten in einer Tabelle präsentiert.'
         },
         step13: {
+            header: 'Favoritenverwaltung',
+            text: 'Die Legendeneinträge/Zeitreihen können als Favoriten abgespeichert werden. Hier werden alle Favoriten gelistet und können verwaltet werden.'
+        },
+        step14: {
             header: 'Fertig',
             text: 'Super!<br> Dieser Client ist ein Produkt von <a href="http://52north.org" target="_blank">52&deg;North GmbH</a>. Auf <a href="https://github.com/52North/js-sensorweb-client" target="_blank">GitHub</a> findest du den aktuellen Entwicklungsstand.'
         }
+    },
+    favorite:{
+        firstValueAt: 'Erster Wert bei',
+        lastValueAt: 'Letzter Wert bei',
+        edit: {
+            header: "Favorit editieren"
+        },
+        group:{
+            add: "Der Status wird mit dem Name '{0}' in den Favoriten abgelegt.",
+            noTimeseries: "Derzeit sind keine Zeitreihen ausgewählt.",
+            exists: "Dieser Status existiert bereits.",
+            notSupported: "Der Datenanbieter eines Eintrag aus '{0}' wird nicht unterstützt und kann deswegen nicht eingeladen werden."
+        },
+        single: {
+            add: "Einer neuer Favorit mit dem Name '{0}' ist abgelegt worden.",
+            remove: "Der Favorit '{0}' ist entfernt worden.",
+            exists: "Dieser Favorit existiert bereits.",
+            notSupported: "Der Datenanbieter des Favoriten '{0}' wird nicht unterstützt und kann deswegen nicht eingeladen werden."
+        }
+    },
+    inform: {
+        error: "Ein Fehler ist aufgetreten: ",
+        warn: "Bitte beachten Sie: "
     }
 };/*
  * Copyright (C) 2014-2014 52°North Initiative for Geospatial Open Source
@@ -854,7 +1158,7 @@ var Settings = {
             apiUrl: 'http://sensorweb.demo.52north.org/sensorwebclient-webapp-stable/api/v1/'
         }
     ],
-    // A list of timeseries-API urls and an appropriate identifier to create internal timeseries ids 
+    // A list of timeseries-API urls and an appropriate identifier to create internal timeseries ids
     restApiUrls: {
 //		'http://192.168.1.135:8080/sensorwebclient-webapp/api/v1/' : 'localhost'
 //		'http://localhost:8090/sensorwebclient-webapp-3.3.0-SNAPSHOT/api/v1/' : 'localhost'
@@ -873,14 +1177,14 @@ var Settings = {
     // default setting for generalization of the data
     generalizeData: false,
     // default setting for save status
-    saveStatus: true,
+    saveStatus: false,
     // default setting for concentration marker
     concentrationMarker: false,
     // zoom level in the map, used for user location and station position
     zoom: 13,
     // date/time format which is used on several places
     dateformat: 'DD.MM.YY HH:mmZ',
-    shortDateformat: "DD.MM.YY",
+    shortDateformat: 'DD.MM.YY',
     // duration after which latest values shall be ignored when rendering marker in the map
     ignoreAfterDuration: moment.duration(1, 'y'),
     // duration buffer for time series request
@@ -897,31 +1201,127 @@ var Settings = {
     },
     // default language for i18n
     defaultLanguage: 'en',
-    // should saving the status be possible, 
+    // should saving the status be possible,
     saveStatusPossible: true,
     // entries on a page for the values table
     pagesize: 20,
     // line width for selected timeseries
     selectedLineWidth: 5,
     // common line width for unselected timeseries
-    commonLineWidth: 2, 
+    commonLineWidth: 2,
     // chart styling options see for more details: https://github.com/flot/flot/blob/master/API.md
     chartOptions: {},
-    // colorlist to select for a different timeseries color 
+    // colorlist to select for a different timeseries color
     colorList: ['#1abc9c', '#27ae60', '#2980b9', '#8e44ad', '#2c3e50', '#f1c40f',
         '#d35400', '#c0392b', '#7f8c8d'],
-    // interval to display the timeseries in a bar diagram with label and value in hours 
+    // interval to display the timeseries in a bar diagram with label and value in hours
     intervalList: [
         {label: _('styleChange.barChartInterval.hour'), value: 1},
         {label: _('styleChange.barChartInterval.day'), value: 24},
         {label: _('styleChange.barChartInterval.week'), value: 7 * 24},
         {label: _('styleChange.barChartInterval.month'), value: 30 * 24}
     ],
+    timeRangeData: {
+        presets: [
+            {
+                name: 'lastHour',
+                label: _('timeSelection.presets.lastHour'),
+                interval: {
+                    from: moment().subtract('hours', 1),
+                    till: moment(),
+                    mode: 'minutes'
+                }
+            },
+            {
+                name: 'today',
+                label: _('timeSelection.presets.today'),
+                interval: {
+                    from: moment().startOf('day'),
+                    till: moment().endOf('day'),
+                    mode: 'day'
+                }
+            },
+            {
+                name: 'yesterday',
+                label: _('timeSelection.presets.yesterday'),
+                interval: {
+                    from: moment().subtract('days', 1).startOf('day'),
+                    till: moment().subtract('days', 1).endOf('day'),
+                    mode: 'day'
+                }
+            },
+            {
+                name: 'todayYesterday',
+                label: _('timeSelection.presets.todayYesterday'),
+                interval: {
+                    from: moment().subtract('days', 1).startOf('day'),
+                    //till: moment(),
+                    mode: 'day'
+                }
+            },
+            {
+                name: 'thisWeek',
+                label: _('timeSelection.presets.thisWeek'),
+                interval: {
+                    from: moment().startOf('week'),
+                    //till: moment(),
+                    mode: 'week'
+                }
+            },
+            {
+                name: 'lastWeek',
+                label: _('timeSelection.presets.lastWeek'),
+                interval: {
+                    from: moment().subtract('weeks', 1).startOf('week'),
+                    till: moment().subtract('weeks', 1).endOf('week'),
+                    mode: 'week'
+                }
+            },
+            {
+                name: 'thisMonth',
+                label: _('timeSelection.presets.thisMonth'),
+                interval: {
+                    from: moment().startOf('month'),
+                    //till: moment(),
+                    mode: 'month'
+                }
+            },
+            {
+                name: 'lastMonth',
+                label: _('timeSelection.presets.lastMonth'),
+                interval: {
+                    from: moment().subtract('months', 1).startOf('month'),
+                    till: moment().subtract('months', 1).endOf('month'),
+                    mode: 'month'
+                }
+            },
+            {
+                name: 'thisYear',
+                label: _('timeSelection.presets.thisYear'),
+                interval: {
+                    from: moment().startOf('year'),
+                    //till: moment(),
+                    mode: 'year'
+                }
+            },
+            {
+                name: 'lastYear',
+                label: _('timeSelection.presets.lastYear'),
+                interval: {
+                    from: moment().subtract('years', 1).startOf('year'),
+                    till: moment().subtract('years', 1).endOf('year'),
+                    mode: 'year'
+                }
+            }
+        ]
+    },
+    wmsLayer: [],
     // configuration for the tile layer in the leaflet map (see for more information: http://leafletjs.com/reference.html#tilelayer )
     tileLayerUrl: 'http://{s}.tile.osm.org/{z}/{x}/{y}.png',
     tileLayerOptions: {
         attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
-    }
+    },
+    enableGeoSearch: true
 };/*
  * Copyright (C) 2014-2014 52°North Initiative for Geospatial Open Source
  * Software GmbH
@@ -971,60 +1371,83 @@ var Template = {
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+var Storage = {
+    generateKey: function(postfix) {
+        var loc = window.location;
+        if (!loc.origin) {
+            loc.origin = loc.protocol + "//" + loc.hostname
+                    + (loc.port ? ':' + loc.port : '');
+        }
+        return loc.origin + loc.pathname + postfix;
+    },
+    saveObject: function(key, object) {
+        if (Settings.saveStatusPossible) {
+            try {
+                $.totalStorage(key, object);
+            } catch (e) {
+                Settings.saveStatusPossible = false;
+                // safari mobile in private mode???
+                // http://davidwalsh.name/quota_exceeded_err
+                // alert("No Status saving possible.");
+            }
+        }
+    },
+    load: function(key) {
+        return $.totalStorage(key);
+    }
+};/*
+ * Copyright (C) 2014-2014 52°North Initiative for Geospatial Open Source
+ * Software GmbH
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+var Inform = {
+    error: function(message) {
+        Inform._createMessage(_('inform.error'), message);
+    },
+    warn: function(message) {
+        Inform._createMessage(_('inform.warn'), message);
+    },
+    _createMessage: function(level, message) {
+        alert(level + "\n" + message);
+    }
+};/*
+ * Copyright (C) 2014-2014 52°North Initiative for Geospatial Open Source
+ * Software GmbH
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 var Time = {
-    isoTimespan: function(type) {
+    isoTimespan: function(interval) {
         /*
          * a) Start and end, such as "2007-03-01T13:00:00Z/2008-05-11T15:30:00Z"
          * b) Start and duration, such as "2007-03-01T13:00:00Z/P1Y2M10DT2H30M"
          * c) Duration and end, such as "P1Y2M10DT2H30M/2008-05-11T15:30:00Z"
          */
         // return obj: {from, till, mode}
-        var from = moment().startOf('day');
-        var till = moment().endOf('day');
-        var mode = null;
-
-        switch (type) {
-            case 'today':
-                from = from.startOf('day');
-                mode = 'day';
-                break;
-            case 'yesterday':
-                from = from.subtract('days', 1).startOf('day');
-                till = till.subtract('days', 1).endOf('day');
-                mode = 'day';
-                break;
-            case 'today_yesterday':
-                from = from.subtract('days', 1).startOf('day');
-                mode = 'day';
-                break;
-            case 'lastWeek':
-                from = from.subtract('weeks', 1).startOf('week');
-                till = till.subtract('weeks', 1).endOf('week');
-                mode = 'week';
-                break;
-            case 'thisWeek':
-                from = from.startOf('week');
-                mode = 'week';
-                break;
-            case 'lastMonth':
-                from = from.subtract('months', 1).startOf('month');
-                till = till.subtract('months', 1).endOf('month');
-                mode = 'month';
-                break;
-            case 'thisMonth':
-                from = from.startOf('month');
-                mode = 'month';
-                break;
-            case 'thisYear':
-                from = from.startOf('year');
-                mode = 'year';
-                break;
-            case 'lastYear':
-                from = from.subtract('years', 1).startOf('year');
-                till = till.subtract('years', 1).endOf('year');
-                mode = 'year';
-                break;
-        }
+        var from = (interval && interval.from) || moment().startOf('day');
+        var till = (interval && interval.till) || moment().endOf('day');
+        var mode = (interval && interval.mode) || 'day';
 
         return {
             'from': from,
@@ -1035,9 +1458,9 @@ var Time = {
     getRequestTimespan: function(from, till) {
         return moment(from).format() + '/' + moment(till).format();
     },
-    createTimespan: function(string) {
-        var timespan = string.split('/');
-        if (timespan.length == 2) {
+    createTimespan: function(interval) {
+        var timespan = interval.split('/');
+        if (timespan.length === 2) {
             var start = moment(timespan[0]);
             var end = moment(timespan[1]);
             if (start.isValid() && end.isValid()) {
@@ -1048,7 +1471,7 @@ var Time = {
                 };
             }
         }
-        return this.isoTimespan(string);
+        return this.isoTimespan(interval);
     },
     getFormatedTime: function(timestamp) {
         return moment(timestamp).format(Settings.dateformat);
@@ -1141,7 +1564,7 @@ var Rest = {
     },
     requestFailed: function(error) {
         if (error.responseJSON && error.responseJSON.userMessage) {
-            alert(error.responseJSON.userMessage);
+            Inform.error(error.responseJSON.userMessage);
         }
     },
     tsData: function(id, apiUrl, timespan, internalId, extendedData) {
@@ -1291,22 +1714,28 @@ var Pages = {
             $('[data-toggle="phenomena"]').text(name);
         }
     },
-    init: function() {
-        $(document).ready(function() {
-            $('[data-toggle=legend]').click(function() {
-                Pages.toggleLegend(true);
-            });
-            $('[data-toggle=phenomena]').click(function() {
-                var label = $('.phenomena-entry').find('.selected').text();
-                Pages.togglePhenomenon(true, label);
-            });
-            $('[data-target="#map"]').click(function() {
-                Pages.navigateToMap();
-            });
-            $('[data-target="#chart"]').click(function() {
-                Pages.navigateToChart();
-            });
+    activateNavButtonsHandler: function() {
+        $('[data-target="#map"]').click(function() {
+            Pages.navigateToMap();
         });
+        $('[data-target="#chart"]').click(function() {
+            Pages.navigateToChart();
+        });
+    },
+    activateToggleButtonsHandler: function() {
+        $('[data-toggle=legend]').click(function() {
+            Pages.toggleLegend(true);
+        });
+        $('[data-toggle=phenomena]').click(function() {
+            var label = $('.phenomena-entry').find('.selected').text();
+            Pages.togglePhenomenon(true, label);
+        });
+    },
+    init: function() {
+        $(document).ready($.proxy(function() {
+            this.activateNavButtonsHandler();
+            this.activateToggleButtonsHandler();
+        }, this));
         // navigation
         Pages.routeToPage();
     },
@@ -1410,57 +1839,37 @@ var EventManager = {
  * limitations under the License.
  */
 var Status = (function() {
-    var generateKey = function() {
-        var loc = window.location;
-        if (!loc.origin) {
-            loc.origin = loc.protocol + "//" + loc.hostname
-                    + (loc.port ? ':' + loc.port : '');
-        }
-        return loc.origin + loc.pathname + "settings";
-    };
     var status = {
-        key: generateKey(),
-        defaultValues: {
-            'provider': Settings.defaultProvider,
-            'clusterStations': Settings.clusterStations,
-            'generalizeData': Settings.generalizeData,
-            'timeseries': {},
-            'timespan': Time.isoTimespan('today'),
-            'saveStatus': Settings.saveStatus,
-            'concentrationMarker': Settings.concentrationMarker
+        createDefaultValues: function() {
+            this.defaultValues = {
+                'provider': Settings.defaultProvider,
+                'clusterStations': Settings.clusterStations,
+                'generalizeData': Settings.generalizeData,
+                'timeseries': {},
+                'timespan': Time.isoTimespan(),
+                'saveStatus': Settings.saveStatus,
+                'concentrationMarker': Settings.concentrationMarker
+            };
         },
         init: function() {
+            this.createDefaultValues();
+            this.key = Storage.generateKey('settings');
             this.load();
             if (!this.get('saveStatus')) {
                 this.reset();
             }
         },
-        isSet: function() {
-            if ($.totalStorage(this.key)) {
-                return true;
-            } else {
-                return false;
-            }
-        },
         load: function() {
-            if (this.isSet()) {
-                this.current = $.totalStorage(this.key);
+            var load = Storage.load(this.key);
+            if (load) {
+                this.current = load;
             } else {
                 this.current = this.defaultValues;
                 this.save();
             }
         },
         save: function() {
-            if (Settings.saveStatusPossible) {
-                try {
-                    $.totalStorage(this.key, this.current);
-                } catch (e) {
-                    Settings.saveStatusPossible = false;
-                    // safari mobile in private mode???
-                    // http://davidwalsh.name/quota_exceeded_err
-//					alert("No Status saving possible.");
-                }
-            }
+            Storage.saveObject(this.key, this.current);
         },
         reset: function() {
             this.current = this.defaultValues;
@@ -1519,8 +1928,6 @@ var Status = (function() {
             return $.isEmptyObject(this.current.timeseries) ? false : true;
         }
     };
-
-    status.init();
     return status;
 })();/*
  * Copyright (C) 2014-2014 52°North Initiative for Geospatial Open Source
@@ -1693,12 +2100,13 @@ var StartController = {
         this.loadMainPage();
         // merge settings
         $.extend(Settings, settings);
+        NotifyController.init();
+        Status.init();
         // Call all controller
         PermalinkController.init();
         Pages.init();
         Map.init();
         ListSelectionController.init();
-        SettingsController.init();
         LegendController.init();
         TableController.init();
         TimeController.init();
@@ -1707,6 +2115,8 @@ var StartController = {
         GuidedTourController.init();
         ExportController.init();
         StyleChangeController.init();
+        FavoriteController.init();
+        SettingsController.init();
     },
     loadMainPage: function(){
         var main = Template.createHtml("main");
@@ -1729,13 +2139,13 @@ var StartController = {
  * limitations under the License.
  */
 var PermalinkController = {
-    timespanParam: 'timespan',
-    timeseriesParam: 'timeseries',
-    serviceParam: 'service',
-    featureParam: 'feature',
-    offeringParam: 'offering',
-    procedureParam: 'procedure',
-    phenomenonParam: 'phenomenon',
+    timespanParam: 'span',
+    timeseriesParam: 'ts',
+    servicesParam: 'services',
+    featuresParam: 'features',
+    offeringsParam: 'offerings',
+    proceduresParam: 'procedures',
+    phenomenaParam: 'phenomena',
     init: function() {
         this.checkTimespan();
         this.checkTimeseries();
@@ -1752,73 +2162,87 @@ var PermalinkController = {
         return value;
     },
     checkTimespan: function() {
-        this.evaluateParameter(this.timespanParam, function(timespan) {
+        var setTimespan =  function(timespan) {
             Status.set('timespan', Time.createTimespan(timespan));
-        });
+        };
+        this.evaluateParameter('timespan', setTimespan); // for backward compatibility
+        this.evaluateParameter(this.timespanParam, setTimespan);
     },
     checkTimeseries: function() {
-        this.evaluateParameter(this.timeseriesParam, function(timeseries) {
+        var addTimeseries = function(timeseries) {
             Status.clearTimeseries();
             $.each(timeseries.split(','), function(idx, id) {
                 Status.addTimeseriesById(id);
             });
-        });
+        }
+        this.evaluateParameter('timeseries', addTimeseries); // for backward compatibility
+        this.evaluateParameter(this.timeseriesParam, addTimeseries);
     },
     checkConstellation: function() {
-        var params = this.createConstellationParameterArray();
-        if (params.length > 0) {
+        var constellations = this.createConstellationParameterArray();
+        if (constellations.length > 0) {
             Pages.navigateToChart();
             Status.clearTimeseries();
             var requestLength = 0;
             var foundTimeseriesId;
             var foundService;
             $.each(Settings.restApiUrls, function(url, serviceId) {
-                requestLength++;
-                Rest.search(url, params.join(',')).done($.proxy(function(result) {
-                    if (result.length > 0) {
-                        var timeseries = $.grep(result, function(n, i) {
-                            return n.type === "timeseries" ? true : false;
-                        });
-                        if (!$.isEmptyObject(timeseries[0])) {
-                            foundTimeseriesId = timeseries[0].id;
-                            foundService = url;
+                $.each(constellations, function(idx, constellation) {
+                    requestLength++;
+                    Rest.search(url, constellation.join(',')).done($.proxy(function(result) {
+                        if (result.length > 0) {
+                            var timeseries = $.grep(result, function(n, i) {
+                                return n.type === "timeseries" ? true : false;
+                            });
+                            if (!$.isEmptyObject(timeseries[0])) {
+                                foundTimeseriesId = timeseries[0].id;
+                                foundService = url;
+                                TimeSeriesController.addTSbyId(foundTimeseriesId, foundService);
+                            }
                         }
-                    }
-                    requestLength--;
-                    if (requestLength === 0) {
-                        if (!$.isEmptyObject(foundTimeseriesId)) {
-                            TimeSeriesController.addTSbyId(foundTimeseriesId, foundService);
-                        } else {
-                            window.alert(_('permalink.noMatchingTimeseriesFound'));
+                        requestLength--;
+                        if (requestLength === 0) {
+                            if ($.isEmptyObject(foundTimeseriesId)) {
+                                Inform.warn(_('permalink.noMatchingTimeseriesFound'));
+                            }
                         }
-                    }
-                }, this));
+                    }, this));
+                });
             });
         }
     },
     createConstellationParameterArray: function() {
-        var params = [];
-        var service = this.getParameter(this.serviceParam);
-        if (!$.isEmptyObject(service)) {
-            params.push(service);
+        var constellations = [];
+        var services = this.getParameterArray(this.servicesParam);
+        var features = this.getParameterArray(this.featuresParam);
+        var offerings = this.getParameterArray(this.offeringsParam);
+        var procedures = this.getParameterArray(this.proceduresParam);
+        var phenomena = this.getParameterArray(this.phenomenaParam);
+        if (services && features && offerings && procedures && phenomena) {
+            if ((services.length == features.length) &&
+                    (services.length == offerings.length) &&
+                    (services.length == procedures.length) &&
+                    (services.length == phenomena.length)) {
+                for (i = 0; i < services.length; i++) {
+                    var constellation = [];
+                    constellation.push(services[i]);
+                    constellation.push(features[i]);
+                    constellation.push(offerings[i]);
+                    constellation.push(procedures[i]);
+                    constellation.push(phenomena[i]);
+                    constellations.push(constellation);
+                }
+            } else {
+                Inform.warn(_('permalink.wrongCombinationSize'));
+            }
         }
-        var feature = this.getParameter(this.featureParam);
-        if (!$.isEmptyObject(feature)) {
-            params.push(feature);
+        return constellations;
+    },
+    getParameterArray: function(param) {
+        var array = this.getParameter(param)
+        if (!$.isEmptyObject(array)) {
+            return array.split(',');
         }
-        var offering = this.getParameter(this.offeringParam);
-        if (!$.isEmptyObject(offering)) {
-            params.push(offering);
-        }
-        var procedure = this.getParameter(this.procedureParam);
-        if (!$.isEmptyObject(procedure)) {
-            params.push(procedure);
-        }
-        var phenomenon = this.getParameter(this.phenomenonParam);
-        if (!$.isEmptyObject(phenomenon)) {
-            params.push(phenomenon);
-        }
-        return params;
     },
     createTimespanParam: function() {
         var timespan = TimeController.currentTimespan;
@@ -1841,8 +2265,8 @@ var PermalinkController = {
                     + (loc.port ? ':' + loc.port : '');
         }
         var url = loc.origin + loc.pathname + "?";
-        url = url + this.createTimespanParam();
-        url = url + "&" + this.createTimeseriesParam();
+        url = url + this.createTimeseriesParam();
+        url = url + "&" + this.createTimespanParam();
         return url;
     }
 };/*
@@ -1865,7 +2289,7 @@ var SettingsController = {
     init: function() {
         $(document).ready(function() {
             $('[data-target="#settings"]').click(function() {
-                Modal.show("settings");
+                Modal.show('settings');
                 if (Settings.saveStatusPossible) {
                     // reset status
                     $('.resetStatus').on('click', function() {
@@ -1886,14 +2310,14 @@ var SettingsController = {
                 $('.clusteringStations').on('click', function(e) {
                     var clustering = Button.switchToggleButton(e.currentTarget);
                     Status.set('clusterStations', clustering);
-                    EventManager.publish("clusterStations", clustering);
+                    EventManager.publish('clusterStations', clustering);
                 });
                 // generalize data
                 Button.setToggleButton('.generalizeData', Status.get('generalizeData'));
                 $('.generalizeData').on('click', function(e) {
                     var generalize = Button.switchToggleButton(e.currentTarget);
                     Status.set('generalizeData', generalize);
-                    EventManager.publish("timeseries:update:complete");
+                    EventManager.publish('timeseries:update:complete');
                 });
                 // show concentration marker
                 Button.setToggleButton('.concentrationMarker', Status.get('concentrationMarker'));
@@ -1916,9 +2340,11 @@ var SettingsController = {
                         value: PermalinkController.createPermalink(),
                         size: 5
                     });
+                    $('.qr-code').find('img').remove();
                     $('.qr-code').append($(img));
                 }).show();
                 // imprint
+                EventManager.publish('settings:opened');
             });
         });
     }
@@ -2030,6 +2456,24 @@ var TimeSeriesController = {
     },
     getTimeseriesCollection: function() {
         return this.timeseries;
+    },
+    getMaxTimeExtent: function() {
+        var earliestStart;
+        var latestEnd;
+        $.each(this.timeseries, $.proxy(function(index,elem) {
+            var start = moment(elem.getFirstValue().timestamp);
+            var end = moment(elem.getLastValue().timestamp);
+            if ( !earliestStart || start.isAfter(earliestStart)) {
+                earliestStart = start;
+            }
+            if ( !latestEnd || end.isBefore(latestEnd)) {
+                latestEnd = end;
+            }
+        }));
+        return {
+            from : earliestStart,
+            till: latestEnd
+        };
     }
 };/*
  * Copyright (C) 2014-2014 52°North Initiative for Geospatial Open Source
@@ -2049,19 +2493,7 @@ var TimeSeriesController = {
  */
 var TimeController = {
     currentTimespan: {},
-    timeRangeData: {
-        presets: [
-            {label: _('timeSelection.presets.today'), value: 'today'},
-            {label: _('timeSelection.presets.yesterday'), value: 'yesterday'},
-            {label: _('timeSelection.presets.todayYesterday'), value: 'today_yesterday'},
-            {label: _('timeSelection.presets.thisWeek'), value: 'thisWeek'},
-            {label: _('timeSelection.presets.lastWeek'), value: 'lastWeek'},
-            {label: _('timeSelection.presets.thisMonth'), value: 'thisMonth'},
-            {label: _('timeSelection.presets.lastMonth'), value: 'lastMonth'},
-            {label: _('timeSelection.presets.thisYear'), value: 'thisYear'},
-            {label: _('timeSelection.presets.lastYear'), value: 'lastYear'}
-        ]
-    },
+    timeRangeData: Settings.timeRangeData,
     init: function() {
         // get last save timespan
         this.currentTimespan = Status.get('timespan');
@@ -2135,6 +2567,22 @@ var TimeController = {
         return moment(this.currentTimespan.till).unix() * 1000;
     },
     updateTimeExtent: function() {
+        var maxExtent = TimeSeriesController.getMaxTimeExtent();
+
+        var insideDataInterval = true;
+        if (maxExtent.from && maxExtent.till) {
+            var earliestStart = moment(maxExtent.from);
+            var latestEnd = moment(maxExtent.till);
+            var beforeEaliestStart = this.currentTimespan.till.isBefore(earliestStart);
+            var afterLatestEnd = this.currentTimespan.from.isAfter(latestEnd);
+            insideDataInterval = !(beforeEaliestStart || afterLatestEnd);
+        }
+
+        if ( !insideDataInterval) {
+            // reset current timespan
+            NotifyController.notify(_('chart.outsideOfDataRange'));
+            this.currentTimespan = Status.get('timespan');
+        }
         EventManager.publish("timeextent:change", {
             from: this.currentTimespan.from,
             till: this.currentTimespan.till
@@ -2164,8 +2612,15 @@ var TimeController = {
         this.getNearbyPeriode('add');
         this.updateTimeExtent();
     },
-    setPreset: function(type) {
-        this.currentTimespan = Time.isoTimespan(type);
+    setPreset: function(name) {
+        var interval;
+        $.each(this.timeRangeData.presets, function(idx,elem) {
+            if (elem.name === name) {
+                interval = this.interval;
+                return false;
+            }
+        });
+        this.currentTimespan = Time.isoTimespan(interval);
         this.updateTimeExtent();
         Modal.hide();
     },
@@ -2263,7 +2718,7 @@ var Map = {
     init: function() {
         this.tileLayerUrl = Settings.tileLayerUrl || this.defaultTileLayerUrl;
         this.tileLayerOptions = Settings.tileLayerOptions || this.defaultTileLayerOptions;
-                $(document).ready(function() {
+        $(document).ready(function() {
             $('[data-action="provider"]').click(function() {
                 Map.openProviderList();
             });
@@ -2271,6 +2726,7 @@ var Map = {
                 Map.locateUser();
             });
         });
+        this.createMap();
         this.loadStations();
         EventManager.subscribe("resetStatus", $.proxy(this.loadStations, this));
         EventManager.subscribe("clusterStations", $.proxy(this.loadStations, this));
@@ -2280,26 +2736,46 @@ var Map = {
         if ($("#map").length > 0) {
             this.map = L.map('map');
             L.tileLayer(this.tileLayerUrl, this.tileLayerOptions).addTo(this.map);
+            var overlayMaps = {};
+            $.each(Settings.wmsLayer, $.proxy(function(idx, layer) {
+                try {
+                    var wms = L.tileLayer.wms(layer.url, layer.options).addTo(this.map);
+                    overlayMaps[layer.name] = wms;
+                } catch (e) {
+                    console.error('Could not add wms.');
+                };
+            }, this));
+            if (!$.isEmptyObject(overlayMaps)) {
+                L.control.layers(null, overlayMaps, {
+                    position: 'topleft'
+                }).addTo(this.map);
+            }
             L.Icon.Default.imagePath = 'images';
             this.map.whenReady(function(map) {
                 // locate user methods
                 this.map.on('locationfound', this.onLocationFound);
                 this.map.on('locationerror', this.onLocationError);
             }, this);
+
             L.control.scale().addTo(this.map);
-            new L.Control.GeoSearch({
-                url: 'http://nominatim.openstreetmap.org/search?format=json&q={s}',
-                jsonpParam: 'json_callback',
-                propertyName: 'display_name',
-                searchLabel: _('map.search.label'),
-                notFoundMessage: _('map.search.noResult'),
-                propertyLoc: ['lat', 'lon'],
-                position: 'topcenter',
-                minLength: 2,
-                showMarker: false,
-                provider: new L.GeoSearch.Provider.OpenStreetMap(),
-                zoomLevel: 13
-            }).addTo(this.map);
+            if (Settings.enableGeoSearch) {
+                new L.Control.GeoSearch({
+                    url: 'http://nominatim.openstreetmap.org/search?format=json&q={s}',
+                    jsonpParam: 'json_callback',
+                    propertyName: 'display_name',
+                    searchLabel: _('map.search.label'),
+                    notFoundMessage: _('map.search.noResult'),
+                    propertyLoc: ['lat', 'lon'],
+                    position: 'topcenter',
+                    minLength: 2,
+                    showMarker: false,
+                    provider: new L.GeoSearch.Provider.OpenStreetMap(),
+                    zoomLevel: 13
+                }).addTo(this.map);
+            }
+            this.map.fitBounds([
+            [-80, -170],
+            [80, 170]]);
         }
     },
     /*----- stations -----*/
@@ -2645,7 +3121,7 @@ var Map = {
     },
     onLocationError: function(e) {
         Button.setLoadingButton($('[data-action="locate"]'), false);
-        alert(e.message);
+        Inform.error(e.message);
     },
     showTsInMap: function(event, ts) {
         Pages.navigateToMap();
@@ -2785,7 +3261,7 @@ var ListSelectionController = {
                     Modal.hide();
                     Pages.navigateToChart();
                 } else {
-                    alert(_('listSelection.warning.moreThanOneTimeseries'));
+                    Inform.warn(_('listSelection.warning.moreThanOneTimeseries'));
                 }
             });
         }
@@ -2872,7 +3348,7 @@ var ChartController = {
 
         $(window).resize($.proxy(function() {
             var newRatio = $(document).width() / $(document).height();
-            if (newRatio != window.ratio) {
+            if (newRatio !== window.ratio) {
                 window.ratio = newRatio;
                 this.plotChart();
             }
@@ -2913,7 +3389,7 @@ var ChartController = {
     selectTs: function(event, id) {
         if (this.plot) {
             $.each(this.plot.getData(), function(idx, ts) {
-                if (ts.id == id) {
+                if (ts.id === id) {
                     ts.lines.lineWidth = ChartController.selectedLineWidth;
                     ts.bars.lineWidth = ChartController.selectedLineWidth;
                     ts.selected = true;
@@ -2926,7 +3402,7 @@ var ChartController = {
             });
             this.plot.draw();
             $.each(this.data, function(index, elem) {
-                if (elem.id == id) {
+                if (elem.id === id) {
                     elem.selected = true;
                 }
             });
@@ -2960,13 +3436,13 @@ var ChartController = {
     zeroScaled: function(event, ts) {
         // update all timeseries
         $.each(TimeSeriesController.getTimeseriesCollection(), function(idx, elem) {
-            if (ts.getUom() == elem.getUom()) {
+            if (ts.getUom() === elem.getUom()) {
                 elem.setZeroScaled(ts.isZeroScaled());
             }
         });
         // update data of timeseries
         $.each(this.data, function(idx, elem) {
-            if (elem.uom == ts.getUom()) {
+            if (elem.uom === ts.getUom()) {
                 elem.zeroScaled = ts.isZeroScaled();
             }
         });
@@ -3093,37 +3569,47 @@ var ChartController = {
     plotChart: function() {
         if (this.visible) {
             $('#placeholder').show();
-            this.options.yaxes = this.createYAxis();
-            this.updateXAxis();
-            if (this.data.length > 0) {
+            if (this.data.length === 0) {
+                $("#placeholder").empty();
+                $("#placeholder").append(Template.createHtml('chart-empty'));
+            } else {
+                this.updateXAxis();
+                this.options.yaxes = this.createYAxis();
+
                 this.plot = $.plot('#placeholder', this.data, this.options);
                 $.each(this.plot.getAxes(), $.proxy(function(i, axis) {
                     if (!axis.show)
                         return;
                     var box = axis.box;
-                    if (axis.direction == "y") {
+                    if (axis.direction === "y") {
                         $("<div class='axisTarget' style='position:absolute; left:" + box.left + "px; top:" + box.top + "px; width:" + box.width + "px; height:" + box.height + "px'></div>")
-                                .data("axis.n", axis.n)
-                                .appendTo(this.plot.getPlaceholder())
-                                .click($.proxy(function(event) {
-                                    var target = $(event.currentTarget);
-                                    var selected = false;
-                                    $.each($('.axisTarget'), function(index, elem) {
-                                        elem = $(elem);
-                                        if (target.data('axis.n') == elem.data('axis.n')) {
-                                            selected = elem.hasClass("selected");
+                            .data("axis.n", axis.n)
+                            .appendTo(this.plot.getPlaceholder())
+                            .click($.proxy(function(event) {
+                                var target = $(event.currentTarget);
+                                var selected = false;
+                                $.each($('.axisTarget'), function(index, elem) {
+                                    elem = $(elem);
+                                    if (target.data('axis.n') === elem.data('axis.n')) {
+                                        selected = elem.hasClass("selected");
+                                        return false; // break loop
+                                    }
+                                });
+                                EventManager.publish("timeseries:unselectAll");
+                                $.each(this.plot.getData(), function(index, elem) {
+                                    if (elem.yaxis.n === axis.n && !selected) {
+                                        EventManager.publish("timeseries:selected", elem.id);
+                                        target.addClass("selected");
+                                        if ( !elem.groupedAxis) {
+                                            return false; // break loop
                                         }
-                                    });
-                                    EventManager.publish("timeseries:unselectAll");
-                                    $.each(this.plot.getData(), function(index, elem) {
-                                        if (elem.yaxis.n == axis.n && !selected) {
-                                            EventManager.publish("timeseries:selected", elem.id);
-                                        }
-                                    });
-                                    this.plot.draw();
-                                }, this));
-                        var yaxisLabel = $("<div class='axisLabel yaxisLabel' style=left:" + box.left + "px;></div>")
-                                .text(axis.options.uom).appendTo('#placeholder');
+                                    }
+                                });
+                                this.plot.draw();
+                            }, this));
+
+
+                        var yaxisLabel = $("<div class='axisLabel yaxisLabel' style=left:" + box.left + "px;></div>").text(axis.options.uom).appendTo('#placeholder');
                         $.each(axis.options.tsColors, function(idx, color) {
                             $('<span>').html('&nbsp;&#x25CF;').css('color', color).addClass('labelColorMarker').appendTo(yaxisLabel);
                         });
@@ -3136,14 +3622,20 @@ var ChartController = {
                         elem.lines.lineWidth = ChartController.selectedLineWidth;
                         elem.bars.lineWidth = ChartController.selectedLineWidth;
                         drawNew = true;
+
+                        $.each($('.axisTarget'), function() {
+                            if ($(this).data('axis.n') === elem.yaxis.n) {
+                                if (!$(this).hasClass('selected')) {
+                                    $(this).addClass('selected');
+                                    return false;
+                                }
+                            }
+                        });
                     }
                 });
                 if (drawNew) {
                     this.plot.draw();
                 }
-            } else {
-                $("#placeholder").empty();
-                $("#placeholder").append(Template.createHtml('chart-empty'));
             }
         }
     },
@@ -3154,7 +3646,20 @@ var ChartController = {
     createYAxis: function() {
         var axesList = {};
         $.each(this.data, function(index, elem) {
-            if (!elem.groupedAxis) {
+            if (elem.groupedAxis === undefined || elem.groupedAxis) {
+                if (!axesList.hasOwnProperty(elem.uom)) {
+                    axesList[elem.uom] = {
+                        id: ++Object.keys(axesList).length,
+                        uom: elem.uom,
+                        tsColors: [elem.color],
+                        zeroScaled: elem.zeroScaled
+                    };
+                    elem.yaxis = axesList[elem.uom].id;
+                } else {
+                    axesList[elem.uom].tsColors.push(elem.color);
+                    elem.yaxis = axesList[elem.uom].id;
+                }
+            } else {
                 axesList[elem.id] = {
                     id: ++Object.keys(axesList).length,
                     uom: elem.uom + " @ " + elem.stationLabel,
@@ -3162,17 +3667,6 @@ var ChartController = {
                     zeroScaled: elem.zeroScaled
                 };
                 elem.yaxis = axesList[elem.id].id;
-            } else if (!axesList.hasOwnProperty(elem.uom)) {
-                axesList[elem.uom] = {
-                    id: ++Object.keys(axesList).length,
-                    uom: elem.uom,
-                    tsColors: [elem.color],
-                    zeroScaled: elem.zeroScaled
-                };
-                elem.yaxis = axesList[elem.uom].id;
-            } else {
-                axesList[elem.uom].tsColors.push(elem.color);
-                elem.yaxis = axesList[elem.uom].id;
             }
         });
         var axes = [];
@@ -3188,7 +3682,7 @@ var ChartController = {
     dataAlreadyIn: function(id) {
         var elem = null;
         elem = $.map(this.data, function(elem) {
-            if (id == elem.id) {
+            if (id === elem.id) {
                 return elem;
             }
         });
@@ -3202,7 +3696,7 @@ var ChartController = {
                 return;
             }
         });
-        if (idx>0) {
+        if (idx >= 0) {
             this.data.splice(idx, 1);
         }
     }
@@ -3456,11 +3950,11 @@ var StyleChangeController = {
  */
 var TableController = {
     isVisible: false,
-    tableButton: $('[data-action="dataTable"]'),
-    tableView: $('#tableView'),
     pageStart: 0,
     pageSize: Settings.pagesize || 10,
     init: function() {
+        this.tableButton = $('[data-action="dataTable"]');
+        this.tableView = $('#tableView');
         this.tableButton.show();
         this.tableButton.on('click', $.proxy(function(event) {
             var button = $(event.currentTarget);
@@ -3876,9 +4370,16 @@ var GuidedTourController = (function() {
             initStep: function() {
             }
         }, {
-            anchor: '.navbar-header.chart',
+            anchor: '[data-target="#favorites"]',
             title: _('guide.step13.header'),
             text: _('guide.step13.text'),
+            arrow: true,
+            initStep: function() {
+            }
+        }, {
+            anchor: '.navbar-header.chart',
+            title: _('guide.step14.header'),
+            text: _('guide.step14.text'),
             initStep: function() {
             }
         }];
@@ -3949,4 +4450,450 @@ var GuidedTourController = (function() {
             }, this));
         }
     };
-})();
+})();/*
+ * Copyright (C) 2014-2014 52°North Initiative for Geospatial Open Source
+ * Software GmbH
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+var FavoriteController = {
+    favorites: {},
+    groupIdx: 0,
+    favoriteGroups: {},
+    init: function() {
+        this.key = Storage.generateKey('favorites');
+        this.favoriteButton = $('.favoriteButton');
+        this.favoriteButton.show();
+        this.favoriteButton.on('click', $.proxy(function(event) {
+            this.showFavoritesView();
+        }, this));
+        this.createFavoritesListView();
+        this.activateImportExportHandlers();
+        EventManager.subscribe('timeseries:add', $.proxy(this.addLegendStar, this));
+        EventManager.subscribe('timeseries:changeStyle', $.proxy(this.addLegendStar, this));
+        EventManager.subscribe('map:stationLoaded', $.proxy(this.addStationStar, this));
+        EventManager.subscribe('settings:opened', $.proxy(function() {
+            var permFavButton = $(Template.createHtml('favorite-settings-button'));
+            $('#accordionSettings .permalink .panel-body').append(permFavButton);
+            permFavButton.on('click', $.proxy(function() {
+                if (Object.keys(TimeSeriesController.timeseries).length > 0) {
+                    if (!this.isInFavoriteGroup(TimeSeriesController.timeseries)) {
+                        var label = this.addFavoriteGroup(TimeSeriesController.timeseries);
+                        this.saveFavorites();
+                        NotifyController.notify(_('favorite.group.add').replace('{0}', label));
+                    } else {
+                        NotifyController.notify(_('favorite.group.exists'));
+                    }
+                } else {
+                    NotifyController.notify(_('favorite.group.noTimeseries'));
+                }
+            }, this));
+        }, this));
+        this.loadFavorites();
+    },
+    navigateToFavoritesView: function() {
+        Pages.navigateToPage('#favorite-page');
+        Pages.toggleLegend(false);
+        Pages.togglePhenomenon(false);
+    },
+    clearFavoritesView: function() {
+        $('.favoriteslist').empty();
+    },
+    updateFavoritesView: function() {
+        this.clearFavoritesView();
+        $.each(this.favorites, $.proxy(function(idx, item) {
+            this.drawFavorite(item);
+        }, this));
+        $.each(this.favoriteGroups, $.proxy(function(idx, item) {
+            this.drawFavoriteGroup(item, idx);
+        }, this));
+    },
+    drawFavorite: function(favorite) {
+        var ts = favorite.timeseries;
+        var lastValue = ts.getLastValue();
+        var elem = Template.createHtml('favorite-entry', {
+            id: ts.getInternalId(),
+            label: favorite.label,
+            provider: ts.getServiceLabel(),
+            lastValueTimeFormatted: lastValue ? moment(lastValue.timestamp).format(Settings.dateformat) : '',
+            lastValue: lastValue.value || '',
+            uom: ts.getUom() || ''
+        });
+        $('.favoriteslist').append(elem);
+        this.addFavoriteClickEvent(ts.getInternalId());
+    },
+    drawFavoriteGroup: function(favGroup, idx) {
+        var elem = Template.createHtml('favorite-group-entry', {
+            id: idx,
+            label: favGroup.label,
+            collection: $.map(favGroup.collection, function(ts) {
+                var lastValue = ts.getLastValue();
+                return {
+                    label: ts.getLabel(),
+                    lastValueTimeFormatted: lastValue ? moment(lastValue.timestamp).format(Settings.dateformat) : '',
+                    lastValue: lastValue.value || '',
+                    uom: ts.getUom() || ''
+                };
+            })
+        });
+        $('.favoriteslist').append(elem);
+        this.addGroupClickEvents(idx);
+    },
+    showFavoritesView: function() {
+        this.navigateToFavoritesView();
+    },
+    addFavoriteClickEvent: function(id) {
+        // delete
+        this.addClickEvents(id, 'single-id', 'delete', $.proxy(function(evt) {
+            this.removeFavorite(id);
+//            delete this.favorites[id];
+//            $('[data-single-id=' + id + ']').remove();
+//            var star = $('.star', '[data-id=' + id + ']');
+//            if (star) {
+//                star.addClass('glyphicon-star-empty').removeClass('glyphicon-star');
+//            }
+            this.saveFavorites();
+        }, this));
+        // edit
+        this.addClickEvents(id, 'single-id', 'edit', $.proxy(function(evt) {
+            this.openEditWindow(this.favorites[id]);
+        }, this));
+        // add to diagram
+        this.addClickEvents(id, 'single-id', 'addToDiagram', $.proxy(function(evt) {
+            var ts = this.favorites[id];
+            Pages.navigateToChart();
+            TimeSeriesController.addTS(ts.timeseries);
+        }, this));
+    },
+    addGroupClickEvents: function(id) {
+        // delete
+        this.addClickEvents(id, 'group-id', 'delete', $.proxy(function(evt) {
+            delete this.favoriteGroups[id];
+            $('[data-group-id=' + id + ']').remove();
+            this.saveFavorites();
+        }, this));
+        // edit
+        this.addClickEvents(id, 'group-id', 'edit', $.proxy(function(evt) {
+            this.openEditWindow(this.favoriteGroups[id]);
+        }, this));
+        // add to diagram
+        this.addClickEvents(id, 'group-id', 'addToDiagram', $.proxy(function(evt) {
+            var group = this.favoriteGroups[id];
+            Pages.navigateToChart();
+            $.each(group.collection, function(idx, elem) {
+                TimeSeriesController.addTS(elem);
+            });
+        }, this));
+    },
+    addClickEvents: function(id, typeId, action, todo) {
+        $('[data-' + typeId + '=' + id + '] .' + action).on('click', todo);
+    },
+    openEditWindow: function(entry) {
+        Modal.show("favorite-edit", {
+            label: entry.label
+        });
+        // add click event for button...
+        $('#confirmFavoritEdit').on('click', $.proxy(function(e) {
+            entry.label = $('#favoriteLabel')[0].value;
+            this.saveFavorites();
+            this.updateFavoritesView();
+        }, this));
+    },
+    createFavoritesListView: function() {
+        var list = Template.createHtml('favorites-main');
+        $('.swc-main').append(list);
+        Pages.activateNavButtonsHandler();
+    },
+    activateImportExportHandlers: function() {
+        var fileImport = $('#favorites-file-import');
+        var fileExport = $('#favorites-file-export');
+        fileImport.change($.proxy(this.importFavorites, this));
+        fileExport.click($.proxy(this.exportFavorites, this));
+    },
+    createEmptyStar: function() {
+        return $('<span class="glyphicon glyphicon-star-empty star"></span>');
+    },
+    createFilledStar: function() {
+        return $('<span class="glyphicon glyphicon-star star"></span>');
+    },
+    addLegendStar: function(evt, ts) {
+        var tsId = ts.getInternalId();
+        $('.legendItem[data-id="' + tsId + '"]').find('.legendItemLabel .star').remove();
+        var star;
+        var onClick;
+        if (this.favorites.hasOwnProperty(tsId)) {
+            star = this.createFilledStar();
+            onClick = $.proxy(function(event) {
+                event.stopPropagation();
+                var label = this.removeFavorite(ts);
+                NotifyController.notify(_('favorite.single.remove').replace('{0}', label));
+            }, this);
+        } else {
+            star = this.createEmptyStar();
+            onClick = $.proxy(function(event) {
+                event.stopPropagation();
+                var label = this.addFavorite(ts);
+                NotifyController.notify(_('favorite.single.add').replace('{0}', label));
+            }, this);
+        }
+        $('.legendItem[data-id="' + tsId + '"]').find('.legendItemLabel').append(star);
+        star.on('click', onClick);
+    },
+    addStationStar: function() {
+        $.each($('.stationContent .tsItem'), $.proxy(function(idx, item) {
+            var star;
+            var onClick;
+            var internalID = item.dataset.internalid;
+            $(item).find('.checkbox .star').remove();
+            if (this.favorites.hasOwnProperty(internalID)) {
+                star = this.createFilledStar();
+                onClick = $.proxy(function(event) {
+                    event.stopPropagation();
+                    var label = this.removeFavorite(internalID);
+                    NotifyController.notify(_('favorite.single.remove').replace('{0}', label));
+                    this.addStationStar();
+                }, this);
+            } else {
+                star = this.createEmptyStar();
+                onClick = $.proxy(function(event) {
+                    event.stopPropagation();
+                    var promise = Rest.timeseries(item.dataset.id, Status.get('provider').apiUrl);
+                    promise.done($.proxy(function(ts) {
+                        var label = this.addFavorite(ts);
+                        NotifyController.notify(_('favorite.single.add').replace('{0}', label));
+                        this.addStationStar();
+                    }, this));
+                }, this);
+            }
+            $(item).find('.checkbox label').after(star);
+            star.on('click', onClick);
+        }, this));
+    },
+    addFavorite: function(ts, label) {
+        label = this.addFavoriteToList(ts, label);
+        this.addLegendStar(null, ts);
+        return label;
+    },
+    removeFavorite: function(ts) {
+        if (!(ts instanceof TimeSeries)) {
+            ts = this.favorites[ts].timeseries;
+        }
+        var id = ts.getInternalId();
+        var label = this.favorites[id].label;
+        delete this.favorites[id];
+        $('[data-single-id=' + id + ']').remove();
+        this.addLegendStar(null, ts);
+        return label;
+    },
+    addFavoriteToList: function(ts, label) {
+        label = label || ts.getLabel();
+        this.favorites[ts.getInternalId()] = {
+            label: label,
+            timeseries: ts
+        };
+        this.saveFavorites();
+        this.drawFavorite(this.favorites[ts.getInternalId()]);
+        return label;
+    },
+    hasFavorites: function() {
+        return Object.getOwnPropertyNames(this.favorites).length !== 0;
+    },
+    addFavoriteGroup: function(tsColl, label) {
+        label = label || 'Status ' + this.groupIdx;
+        this.favoriteGroups[this.groupIdx] = {
+            label: label,
+            collection: $.map(tsColl, function(elem, idx) {
+                return elem;
+            })
+        };
+        this.saveFavorites();
+        this.drawFavoriteGroup(this.favoriteGroups[this.groupIdx], this.groupIdx);
+        this.groupIdx++;
+        return label;
+    },
+    isInFavoriteGroup: function(tsColl) {
+        var isInside = false;
+        $.each(this.favoriteGroups, function(idx, elem) {
+            var equivalent = true;
+            if (elem.collection.length === Object.keys(tsColl).length) {
+                $.each(elem.collection, function(idx, elem) {
+                    var bool = false;
+                    $.each(tsColl, function(idx) {
+                        if (idx === elem.getInternalId()) {
+                            bool = true;
+                        }
+                    });
+                    if (!bool)
+                        equivalent = false;
+                });
+            } else {
+                equivalent = false;
+            }
+            if (equivalent)
+                isInside = true;
+        });
+        return isInside;
+    },
+    saveFavorites: function() {
+        var favorites = this.serializeFavorites();
+        Storage.saveObject(this.key, favorites);
+    },
+    loadFavorites: function() {
+        var values = Storage.load(this.key);
+        this.unserializeFavorites(values);
+    },
+    unserializeFavorites: function(values) {
+        if (values) {
+            $.each(values.single, $.proxy(function(idx, elem) {
+                var ts = elem.timeseries;
+                if (this.isSupported(ts)) {
+                    var promise = Rest.timeseries(ts.tsId, ts.apiUrl);
+                    var that = this;
+                    promise.done(function (ts) {
+                        that.addFavorite(ts, elem.label);
+                    });
+                } else {
+                    NotifyController.notify(_('favorite.single.notSupported').replace('{0}', elem.label));
+                }
+            }, this));
+            $.each(values.groups, $.proxy(function(idx, group) {
+                var label = group.label;
+                var deferreds = $.map(group.collection, $.proxy(function(ts) {
+                    if (this.isSupported(ts)) {
+                        var promise = Rest.timeseries(ts.tsId, ts.apiUrl);
+                        return promise;
+                    } else {
+                        NotifyController.notify(_('favorite.group.notSupported').replace('{0}', label));
+                    }
+                }, this));
+                $.when.apply(null, deferreds).done($.proxy(function() {
+                    debugger
+                    this.addFavoriteGroup(arguments, label);
+                }, this));
+            }, this));
+        }
+    },
+    // checks if the provider of the timeseries is configured in the client
+    isSupported: function(ts) {
+        var supported = false;
+        $.each(Settings.restApiUrls, function(idx,elem) {
+            if (ts.apiUrl === idx) supported = true;
+        });
+        return supported;
+    },
+    serializeFavorites: function() {
+        var favorites = {
+            single: $.map(this.favorites, function(elem, idx) {
+                return {
+                    label: elem.label,
+                    timeseries: elem.timeseries.persist()
+                };
+            }),
+            groups: $.map(this.favoriteGroups, function(group, idx) {
+                return {
+                    label: group.label,
+                    collection: $.map(group.collection, function(ts, idx) {
+                        return ts.persist();
+                    })
+                };
+            })
+        };
+        return favorites;
+    },
+    exportFavorites: function() {
+        if (this.isFileAPISupported()) {
+            var filename = 'favorites.json';
+            var content = JSON.stringify(this.serializeFavorites());
+            if (window.navigator.msSaveBlob) {
+                // IE version >= 10
+                var blob = new Blob([content], {
+                    type: 'application/json;charset=utf-8;'
+                });
+                window.navigator.msSaveBlob(blob, filename);
+            } else {
+                // FF, Chrome ...
+                var a = document.createElement('a');
+                a.href = 'data:application/json,' + encodeURI(content);
+                a.target = '_blank';
+                a.download = filename;
+                document.body.appendChild(a);
+                a.click();
+            }
+        } else {
+            Inform.warn('The File APIs are not fully supported in this browser.');
+        }
+    },
+    importFavorites: function(event) {
+        if (this.isFileAPISupported()) {
+            var override = true;
+            if (this.hasFavorites()) {
+                override = confirm('Override favorites?');
+            }
+            if (override) {
+                this.favorites = {};
+                this.clearFavoritesView();
+                var files = event.target.files;
+                if (files && files.length > 0) {
+                    var reader = new FileReader();
+                    reader.readAsText(files[0]);
+                    reader.onerror = function() {
+                        Inform.error('Could not read file!');
+                    };
+                    var that = this;
+                    reader.onload = function(e) {
+                        var content = JSON.parse(e.target.result);
+                        that.unserializeFavorites(content);
+                        that.saveFavorites();
+                    };
+                }
+            }
+        } else {
+            Inform.warn('The File APIs are not fully supported in this browser.');
+        }
+    },
+    isFileAPISupported: function() {
+        return window.File && window.FileReader && window.Blob;
+    }
+
+};/*
+ * Copyright (C) 2014-2014 52°North Initiative for Geospatial Open Source
+ * Software GmbH
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+var NotifyController = {
+    options : {
+        position: 'bottom-left',
+        fade_in_speed: 'medium',
+        fade_out_speed: 2000,
+        time: 4000
+    },
+    init: function() {
+        $.extend($.gritter.options, this.options);
+    },
+    notify: function(text) {
+        $.gritter.add({
+            text: text
+        });
+    }
+}
