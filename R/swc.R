@@ -291,7 +291,7 @@ swcPage <- function(...,
 
   body <- tags$body(
     tags$div(
-      class="jsc-main",
+      class="jsc-main swc-main",
       tags$div(
         class="swc-page",
         id="analysis-page",
