@@ -47,7 +47,10 @@ installSensorWebClient <- function(owner = '52North', repo = 'js-sensorweb-clien
     distFile <- .buildSensorWebClient(projectDir, tmpDir)
 
     .replaceExistingSensorWebClientInstallation(distFile, tmpDir, swcDir)
-    
+
+    file.copy(from = file.path(basePath, 'inst', 'jsc-shiny.js'),
+              to = file.path(swcDir, 'www', 'js'))
+
     futile.logger::flog.trace("Deleting %s", tmpDir)
     unlink(tmpDir, recursive = TRUE)
 }
