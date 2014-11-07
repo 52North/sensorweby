@@ -44,6 +44,7 @@ registerInputHandler("n52.datetime", function(x, shinysession, name) {
 #'
 #' @param id the id of the input
 #' @return a HTML \code{input} tag
+#' @export
 #' @examples
 #' \dontrun{
 #'  swcTimeBeginInput('begin')
@@ -59,6 +60,7 @@ swcTimeBeginInput <- function(id) {
 #'
 #' @param id the id of the input
 #' @return a HTML \code{input} tag
+#' @export
 #' @examples
 #' \dontrun{
 #'  swcTimeEndInput('end')
@@ -75,6 +77,7 @@ swcTimeEndInput <- function(id) {
 #'
 #' @param id the id of the input
 #' @return a HTML \code{input} tag
+#' @export
 #' @examples
 #' \dontrun{
 #'  swcTimeseriesInput('series')
@@ -91,6 +94,7 @@ swcTimeseriesInput <- function(id) {
 #' @param key the message key
 #' @param value the message value
 #' @return a HTML \code{script} tag setting the value
+#' @export
 #' @examples
 #' \dontrun{
 #'  swcI18N('eng', 'button_label', 'OK')
@@ -106,6 +110,7 @@ swcI18N <- function(lang, key, value) {
 #'
 #' @inheritParams shiny::tag
 #' @return a HTML \code{div} tag for the left panel
+#' @export
 #' @examples
 #' \dontrun{
 #' swcLeftPanel(
@@ -124,6 +129,7 @@ swcLeftPanel <- function(...) {
 #' @inheritParams shiny::tag
 #' @param header the header of the right panel
 #' @return a HTML \code{div} tag for the right panel
+#' @export
 #' @examples
 #' \dontrun{
 #' swcRightPanel(
@@ -170,6 +176,7 @@ swcRightPanel <- function(header, ...) {
 #' @param description the HTML \code{meta} tag description
 #' @param debug indicates if the client should be run in debug mode
 #' @return a HTML \code{html} tag containing the client
+#' @export
 #' @examples
 #' \dontrun{
 #' swcPage(
