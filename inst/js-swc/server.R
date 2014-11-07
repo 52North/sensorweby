@@ -26,22 +26,30 @@
 # Public License for more details.
 #
 
-
-library("openair")
+library(sensorweby)
+library(openair)
+library(sensorweb4R)
+library(futile.logger)
 
 formatTime <- function(x) {
     if (is.null(x) || is.na(x)) x else format(x, "%Y-%m-%dT%H:%M:%OS3")
 }
 
-# TODO load distance matching table here
+url <- 'http://sensorweb.demo.52north.org/sensorwebclient-webapp-stable'
+service <- 'srv_6d9ccea8d609ecb74d4a512922bb7cee'
 
+flog.info("Requesting stations")
+stations <- get_stations(url, service = service)
+
+flog.info("Creating distance matrix ...")
+dm <- create_distance_matrix(stations)
 
 # function is called once each session
 shinyServer(func = function(input, output, session) {
-    futile.logger::flog.debug("New session at server.") # is false: %s", toString(serverInfo()))
+    flog.debug("New session at server.") # is false: %s", toString(serverInfo()))
     
     # only works in reactive environment..
-    #futile.logger::flog.debug("New session: %s", toString(paste(names(as.list(session$clientData)), as.list(session$clientData), sep = ": ")))
+    #flog.debug("New session: %s", toString(paste(names(as.list(session$clientData)), as.list(session$clientData), sep = ": ")))
     
     output$begin <- renderText({
         formatTime(input$begin);
@@ -57,7 +65,7 @@ shinyServer(func = function(input, output, session) {
     });
     
     output$pollutionRose <- renderPlot({
-        futile.logger::flog.trace("Rendering plot for %s", input$pollutant)
+        flog.trace("Rendering plot for %s", input$pollutant)
         
         pollutant <- switch(input$pollutant, 
                             NOX="nox",
@@ -67,7 +75,7 @@ shinyServer(func = function(input, output, session) {
                             SO2="so2",
                             CO="co",
                             PM25="pm25");
-        openair::pollutionRose(mydata, pollutant = pollutant, year = 2001);
+        pollutionRose(mydata, pollutant = pollutant, year = 2001);
     });
 
 });
