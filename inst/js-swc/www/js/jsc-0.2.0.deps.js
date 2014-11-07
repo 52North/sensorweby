@@ -1,3 +1,120 @@
+/*!
+ * jQuery-ajaxTransport-XDomainRequest - v1.0.3 - 2014-06-06
+ * https://github.com/MoonScript/jQuery-ajaxTransport-XDomainRequest
+ * Copyright (c) 2014 Jason Moon (@JSONMOON)
+ * Licensed MIT (/blob/master/LICENSE.txt)
+ */
+(function(factory) {
+  if (typeof define === 'function' && define.amd) {
+    // AMD. Register as anonymous module.
+    define(['jquery'], factory);
+  } else if (typeof exports === 'object') {
+    // CommonJS
+    module.exports = factory(require('jquery'));
+  } else {
+    // Browser globals.
+    factory(jQuery);
+  }
+}(function($) {
+
+// Only continue if we're on IE8/IE9 with jQuery 1.5+ (contains the ajaxTransport function)
+if ($.support.cors || !$.ajaxTransport || !window.XDomainRequest) {
+  return;
+}
+
+var httpRegEx = /^https?:\/\//i;
+var getOrPostRegEx = /^get|post$/i;
+var sameSchemeRegEx = new RegExp('^'+location.protocol, 'i');
+
+// ajaxTransport exists in jQuery 1.5+
+$.ajaxTransport('* text html xml json', function(options, userOptions, jqXHR) {
+  
+  // Only continue if the request is: asynchronous, uses GET or POST method, has HTTP or HTTPS protocol, and has the same scheme as the calling page
+  if (!options.crossDomain || !options.async || !getOrPostRegEx.test(options.type) || !httpRegEx.test(options.url) || !sameSchemeRegEx.test(options.url)) {
+    return;
+  }
+
+  var xdr = null;
+
+  return {
+    send: function(headers, complete) {
+      var postData = '';
+      var userType = (userOptions.dataType || '').toLowerCase();
+
+      xdr = new XDomainRequest();
+      if (/^\d+$/.test(userOptions.timeout)) {
+        xdr.timeout = userOptions.timeout;
+      }
+
+      xdr.ontimeout = function() {
+        complete(500, 'timeout');
+      };
+
+      xdr.onload = function() {
+        var allResponseHeaders = 'Content-Length: ' + xdr.responseText.length + '\r\nContent-Type: ' + xdr.contentType;
+        var status = {
+          code: 200,
+          message: 'success'
+        };
+        var responses = {
+          text: xdr.responseText
+        };
+        try {
+          if (userType === 'html' || /text\/html/i.test(xdr.contentType)) {
+            responses.html = xdr.responseText;
+          } else if (userType === 'json' || (userType !== 'text' && /\/json/i.test(xdr.contentType))) {
+            try {
+              responses.json = $.parseJSON(xdr.responseText);
+            } catch(e) {
+              status.code = 500;
+              status.message = 'parseerror';
+              //throw 'Invalid JSON: ' + xdr.responseText;
+            }
+          } else if (userType === 'xml' || (userType !== 'text' && /\/xml/i.test(xdr.contentType))) {
+            var doc = new ActiveXObject('Microsoft.XMLDOM');
+            doc.async = false;
+            try {
+              doc.loadXML(xdr.responseText);
+            } catch(e) {
+              doc = undefined;
+            }
+            if (!doc || !doc.documentElement || doc.getElementsByTagName('parsererror').length) {
+              status.code = 500;
+              status.message = 'parseerror';
+              throw 'Invalid XML: ' + xdr.responseText;
+            }
+            responses.xml = doc;
+          }
+        } catch(parseMessage) {
+          throw parseMessage;
+        } finally {
+          complete(status.code, status.message, responses, allResponseHeaders);
+        }
+      };
+
+      // set an empty handler for 'onprogress' so requests don't get aborted
+      xdr.onprogress = function(){};
+      xdr.onerror = function() {
+        complete(500, 'error', {
+          text: xdr.responseText
+        });
+      };
+
+      if (userOptions.data) {
+        postData = ($.type(userOptions.data) === 'string') ? userOptions.data : $.param(userOptions.data);
+      }
+      xdr.open(options.type, options.url);
+      xdr.send(postData);
+    },
+    abort: function() {
+      if (xdr) {
+        xdr.abort();
+      }
+    }
+  };
+});
+
+}));
 /* Javascript plotting library for jQuery, version 0.8.2.
 
 Copyright (c) 2007-2013 IOLA and Ole Laursen.
@@ -3913,6 +4030,754 @@ Licensed under the MIT License ~ http://threedubmedia.googlecode.com/files/MIT-L
         name: 'navigate',
         version: '1.3'
     });
+})(jQuery);
+(function($) {
+
+
+  if ( ! (window.isMobile() || window.isTouchDevice())) {
+      return;
+  }
+
+  var isReady = false;
+	var options = {
+	  touch: {
+	    pan: 'x',
+	    //scale: 'xy',
+	    autoWidth: true,
+	    autoHeight: false
+	  }
+	};
+
+	function init(plot) {
+		var isPanning = false;
+		var isZooming = false;
+		var lastTouchPosition = { x: -1, y: -1 };
+		var lastTouchDistance = 0;
+		var relativeOffset = { x: 0, y: 0};
+		var relativeScale = 1.0;
+		var scaleOrigin = { x: 50, y: 50 };
+
+		function pan(delta) {
+			var placeholder = plot.getPlaceholder();
+			var options = plot.getOptions();
+
+			relativeOffset.x -= delta.x;
+			relativeOffset.y -= delta.y;
+
+			switch (options.touch.pan.toLowerCase()) {
+			  case 'x':
+			    placeholder.children('div.flot-touch-container').css('-webkit-transform', 'translateX(' + relativeOffset.x + 'px)');
+			    break;
+			  case 'y':
+			    placeholder.children('div.flot-touch-container').css('-webkit-transform', 'translateY(' + relativeOffset.y + 'px)');
+			    break;
+			  default:
+			    placeholder.children('div.flot-touch-container').css('-webkit-transform', 'translate(' + relativeOffset.x + 'px,' + relativeOffset.y + 'px)');
+			    break;
+			}
+		}
+
+		function scale(delta) {
+			var placeholder = plot.getPlaceholder();
+			var options = plot.getOptions();
+			var container = placeholder.children('div.flot-touch-container');
+
+			relativeScale *= 1 + (delta / 100);
+
+			switch (options.touch.scale.toLowerCase()) {
+			  case 'x':
+			    container.css('-webkit-transform', 'scaleX(' + relativeScale + ')');
+			    break;
+			  case 'y':
+			    container.css('-webkit-transform', 'scaleY(' + relativeScale + ')');
+			    break;
+              case 'xy':
+			    container.css('-webkit-transform', 'scale(' + relativeScale + ')');
+			    break;
+              default:
+                // disabled
+                break;
+			}
+		}
+
+		function processOptions(plot, options) {
+		  var placeholder = plot.getPlaceholder();
+
+		  if (options.touch.autoWidth) {
+		    placeholder.css('width', '100%');
+		  }
+
+		  if (options.touch.autoHeight) {
+  		  var placeholderParent = placeholder.parent();
+  		  var height = 0;
+
+  		  placeholderParent.siblings().each(function() {
+  		    height -= $(this).outerHeight();
+  		  });
+
+  		  height -= parseInt(placeholderParent.css('padding-top'), 10);
+        height -= parseInt(placeholderParent.css('padding-bottom'), 10);
+		    height += window.innerHeight;
+
+  		  placeholder.css('height', (height <= 0) ? 100 : height + 'px');
+  		}
+		}
+
+		function bindEvents(plot, eventHolder) {
+			var placeholder = plot.getPlaceholder();
+			var container = $('<div class="flot-touch-container" style="background:#fff;"/>');
+
+			placeholder.css({
+			  //'background': '#fff url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAMAAAAoLQ9TAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAAZQTFRF////mpqaPjL2kgAAABdJREFUeNpiYIQCBhgYIIEBth4mABBgAEUQAIEfdL0YAAAAAElFTkSuQmCC) repeat',
+			  //'overflow': 'hidden'
+			}).children('canvas').wrapAll(container);
+
+			placeholder.bind('touchstart', function(evt) {
+				var touches = evt.originalEvent.touches;
+				var container = placeholder.children('div.flot-touch-container');
+
+				if (touches.length === 1) {
+					isPanning = true;
+					lastTouchPosition = {
+						x: touches[0].pageX,
+						y: touches[0].pageY
+					};
+					lastTouchDistance = 0;
+				}
+
+				else if (touches.length === 2) {
+					isZooming = true;
+					lastTouchPosition = {
+						x: (touches[0].pageX + touches[1].pageX) / 2,
+						y: (touches[0].pageY + touches[1].pageY) / 2
+					};
+					lastTouchDistance = Math.sqrt(Math.pow(touches[1].pageX - touches[0].pageX, 2) + Math.pow(touches[1].pageY - touches[0].pageY, 2));
+				}
+
+				var offset = placeholder.offset();
+				var rect = {
+				  x: offset.left,
+				  y: offset.top,
+				  width: placeholder.width(),
+				  height: placeholder.height()
+				};
+
+				var normalizedTouchPosition = {
+				  x: lastTouchPosition.x,
+				  y: lastTouchPosition.y
+				};
+
+				if (normalizedTouchPosition.x < rect.x) {
+				  normalizedTouchPosition.x = rect.x;
+				} else if (normalizedTouchPosition.x > rect.x + rect.width) {
+				  normalizedTouchPosition.x = rect.x + rect.width;
+				}
+
+				if (normalizedTouchPosition.y < rect.y) {
+				  normalizedTouchPosition.y = rect.y;
+				} else if (normalizedTouchPosition.y > rect.y + rect.height) {
+				  normalizedTouchPosition.y = rect.y + rect.height;
+				}
+
+				scaleOrigin = {
+  			  x: Math.round((normalizedTouchPosition.x / rect.width) * 100),
+  			  y: Math.round((normalizedTouchPosition.y / rect.height) * 100)
+  			};
+
+  			container.css('-webkit-transform-origin', scaleOrigin.x + '% ' + scaleOrigin.y + '%');
+
+				// Return false to prevent touch scrolling.
+				return false;
+			});
+
+			placeholder.bind('touchmove', function(evt) {
+				var touches = evt.originalEvent.touches;
+				var position, distance, delta;
+
+				if (isPanning && touches.length === 1) {
+					position = {
+						x: touches[0].pageX,
+						y: touches[0].pageY
+					};
+					delta = {
+						x: lastTouchPosition.x - position.x,
+						y: lastTouchPosition.y - position.y
+					};
+
+					// Transform via the delta
+					pan(delta);
+
+					lastTouchPosition = position;
+					lastTouchDistance = 0;
+				}
+
+				else if (isZooming && touches.length === 2) {
+					distance = Math.sqrt(Math.pow(touches[1].pageX - touches[0].pageX, 2) + Math.pow(touches[1].pageY - touches[0].pageY, 2));
+					position = {
+						x: (touches[0].pageX + touches[1].pageX) / 2,
+						y: (touches[0].pageY + touches[1].pageY) / 2
+					};
+					delta = distance - lastTouchDistance;
+
+					// Scale via the delta
+					scale(delta);
+
+					lastTouchPosition = position;
+					lastTouchDistance = distance;
+				}
+			});
+
+			placeholder.bind('touchend', function(evt) {
+                var placeholder = plot.getPlaceholder();
+                var options = plot.getOptions();
+                var container = placeholder.children('div.flot-touch-container');
+
+                var applyPanning = relativeOffset.x !== 0 || relativeOffset.y !== 0;
+                var applyZooming = relativeScale !== 1.0;
+
+                // Apply the pan.
+                if (applyPanning) {
+                  $.each(plot.getAxes(), function(index, axis) {
+                    if (axis.direction === options.touch.pan.toLowerCase() || options.touch.pan.toLowerCase() == 'xy') {
+                        var min = axis.c2p(axis.p2c(axis.min) - relativeOffset[axis.direction]);
+                        var max = axis.c2p(axis.p2c(axis.max) - relativeOffset[axis.direction]);
+
+                        axis.options.min = min;
+                        axis.options.max = max;
+                    }
+                  });
+                }
+
+                // Apply the scale.
+                if (applyZooming) {
+                    var width = plot.width();
+                    var height = plot.height();
+                    var scaleOriginPixel = {
+                      x: Math.round((scaleOrigin.x / 100) * width),
+                      y: Math.round((scaleOrigin.y / 100) * height)
+                    };
+                    var range = {
+                        x: {
+                          min: scaleOriginPixel.x - (scaleOrigin.x / 100) * width / relativeScale,
+                          max: scaleOriginPixel.x + (1 - (scaleOrigin.x / 100)) * width / relativeScale
+                        },
+                        y: {
+                          min: scaleOriginPixel.y - (scaleOrigin.y / 100) * height / relativeScale,
+                          max: scaleOriginPixel.y + (1 - (scaleOrigin.y / 100)) * height / relativeScale
+                        }
+                    };
+
+                    $.each(plot.getAxes(), function(index, axis) {
+                      if (axis.direction === options.touch.scale.toLowerCase() || options.touch.scale.toLowerCase() == 'xy') {
+                        var min = axis.c2p(range[axis.direction].min);
+                        var max = axis.c2p(range[axis.direction].max);
+
+                        if (min > max) {
+                          var temp = min;
+                          min = max;
+                          max = temp;
+                        }
+
+                        axis.options.min = min;
+                        axis.options.max = max;
+                      }
+                  });
+
+                }
+
+                plot.setupGrid();
+                plot.draw();
+
+				isPanning = false;
+				isZooming = false;
+				lastTouchPosition = { x: -1, y: -1 };
+				lastTouchDistance = 0;
+				relativeOffset = { x: 0, y: 0 };
+				relativeScale = 1.0;
+				scaleOrigin = { x: 50, y: 50 };
+
+				container.css({
+				  '-webkit-transform': 'translate(' + relativeOffset.x + 'px,' + relativeOffset.y + 'px) scale(' + relativeScale + ')',
+				  '-webkit-transform-origin': scaleOrigin.x + '% ' + scaleOrigin.y + '%'
+				});
+
+                if (applyPanning) {
+                    plot.getPlaceholder().trigger("plotpanEnd", [ plot ]);
+                }
+                if (applyZooming) {
+                    plot.getPlaceholder().trigger("plotzoom", [ plot ]);
+                }
+			});
+		}
+
+		function processDatapoints(plot, series, datapoints) {
+		  if (window.devicePixelRatio) {
+  			var placeholder = plot.getPlaceholder();
+
+			  placeholder.children('canvas').each(function(index, canvas) {
+    		  var context  = canvas.getContext('2d');
+    		  var width = $(canvas).attr('width');
+    		  var height = $(canvas).attr('height');
+
+    		  $(canvas).attr('width', width * window.devicePixelRatio);
+    		  $(canvas).attr('height', height * window.devicePixelRatio);
+    		  $(canvas).css('width', width + 'px');
+    		  $(canvas).css('height', height + 'px');
+
+    		  context.scale(window.devicePixelRatio, window.devicePixelRatio);
+			  });
+  		}
+		}
+
+		function shutdown(plot, eventHolder) {
+			var placeholder = plot.getPlaceholder();
+
+			placeholder.unbind('touchstart').unbind('touchmove').unbind('touchend');
+		}
+
+		plot.hooks.processOptions.push(processOptions);
+		plot.hooks.bindEvents.push(bindEvents);
+		plot.hooks.processDatapoints.push(processDatapoints);
+		plot.hooks.shutdown.push(shutdown);
+
+    if (!isReady) {
+      $(document).bind('ready orientationchange', function(evt) {
+			  window.scrollTo(0, 1);
+
+			  setTimeout(function() {
+			    $.plot(placeholder, plot.getData(), plot.getOptions());
+			  }, 50);
+			});
+
+  		isReady = true;
+  	}
+	}
+
+	$.plot.plugins.push({
+		init: init,
+		options: options,
+		name: 'touch',
+		version: '1.0'
+	});
+})(jQuery);
+/*
+ * Gritter for jQuery
+ * http://www.boedesign.com/
+ *
+ * Copyright (c) 2012 Jordan Boesch
+ * Dual licensed under the MIT and GPL licenses.
+ *
+ * Date: February 24, 2012
+ * Version: 1.7.4
+ */
+
+(function($){
+ 	
+	/**
+	* Set it up as an object under the jQuery namespace
+	*/
+	$.gritter = {};
+	
+	/**
+	* Set up global options that the user can over-ride
+	*/
+	$.gritter.options = {
+		position: '',
+		class_name: '', // could be set to 'gritter-light' to use white notifications
+		fade_in_speed: 'medium', // how fast notifications fade in
+		fade_out_speed: 1000, // how fast the notices fade out
+		time: 6000 // hang on the screen for...
+	}
+	
+	/**
+	* Add a gritter notification to the screen
+	* @see Gritter#add();
+	*/
+	$.gritter.add = function(params){
+
+		try {
+			return Gritter.add(params || {});
+		} catch(e) {
+		
+			var err = 'Gritter Error: ' + e;
+			(typeof(console) != 'undefined' && console.error) ? 
+				console.error(err, params) : 
+				alert(err);
+				
+		}
+		
+	}
+	
+	/**
+	* Remove a gritter notification from the screen
+	* @see Gritter#removeSpecific();
+	*/
+	$.gritter.remove = function(id, params){
+		Gritter.removeSpecific(id, params || {});
+	}
+	
+	/**
+	* Remove all notifications
+	* @see Gritter#stop();
+	*/
+	$.gritter.removeAll = function(params){
+		Gritter.stop(params || {});
+	}
+	
+	/**
+	* Big fat Gritter object
+	* @constructor (not really since its object literal)
+	*/
+	var Gritter = {
+		
+		// Public - options to over-ride with $.gritter.options in "add"
+		position: '',
+		fade_in_speed: '',
+		fade_out_speed: '',
+		time: '',
+		
+		// Private - no touchy the private parts
+		_custom_timer: 0,
+		_item_count: 0,
+		_is_setup: 0,
+		_tpl_close: '<a class="gritter-close" href="#" tabindex="1">Close Notification</a>',
+		_tpl_title: '<span class="gritter-title">[[title]]</span>',
+		_tpl_item: '<div id="gritter-item-[[number]]" class="gritter-item-wrapper [[item_class]]" style="display:none" role="alert"><div class="gritter-top"></div><div class="gritter-item">[[close]][[image]]<div class="[[class_name]]">[[title]]<p>[[text]]</p></div><div style="clear:both"></div></div><div class="gritter-bottom"></div></div>',
+		_tpl_wrap: '<div id="gritter-notice-wrapper"></div>',
+		
+		/**
+		* Add a gritter notification to the screen
+		* @param {Object} params The object that contains all the options for drawing the notification
+		* @return {Integer} The specific numeric id to that gritter notification
+		*/
+		add: function(params){
+			// Handle straight text
+			if(typeof(params) == 'string'){
+				params = {text:params};
+			}
+
+			// We might have some issues if we don't have a title or text!
+			if(params.text === null){
+				throw 'You must supply "text" parameter.'; 
+			}
+			
+			// Check the options and set them once
+			if(!this._is_setup){
+				this._runSetup();
+			}
+			
+			// Basics
+			var title = params.title, 
+				text = params.text,
+				image = params.image || '',
+				sticky = params.sticky || false,
+				item_class = params.class_name || $.gritter.options.class_name,
+				position = $.gritter.options.position,
+				time_alive = params.time || '';
+
+			this._verifyWrapper();
+			
+			this._item_count++;
+			var number = this._item_count, 
+				tmp = this._tpl_item;
+			
+			// Assign callbacks
+			$(['before_open', 'after_open', 'before_close', 'after_close']).each(function(i, val){
+				Gritter['_' + val + '_' + number] = ($.isFunction(params[val])) ? params[val] : function(){}
+			});
+
+			// Reset
+			this._custom_timer = 0;
+			
+			// A custom fade time set
+			if(time_alive){
+				this._custom_timer = time_alive;
+			}
+			
+			var image_str = (image != '') ? '<img src="' + image + '" class="gritter-image" />' : '',
+				class_name = (image != '') ? 'gritter-with-image' : 'gritter-without-image';
+			
+			// String replacements on the template
+			if(title){
+				title = this._str_replace('[[title]]',title,this._tpl_title);
+			}else{
+				title = '';
+			}
+			
+			tmp = this._str_replace(
+				['[[title]]', '[[text]]', '[[close]]', '[[image]]', '[[number]]', '[[class_name]]', '[[item_class]]'],
+				[title, text, this._tpl_close, image_str, this._item_count, class_name, item_class], tmp
+			);
+
+			// If it's false, don't show another gritter message
+			if(this['_before_open_' + number]() === false){
+				return false;
+			}
+
+			$('#gritter-notice-wrapper').addClass(position).append(tmp);
+			
+			var item = $('#gritter-item-' + this._item_count);
+			
+			item.fadeIn(this.fade_in_speed, function(){
+				Gritter['_after_open_' + number]($(this));
+			});
+			
+			if(!sticky){
+				this._setFadeTimer(item, number);
+			}
+			
+			// Bind the hover/unhover states
+			$(item).bind('mouseenter mouseleave', function(event){
+				if(event.type == 'mouseenter'){
+					if(!sticky){ 
+						Gritter._restoreItemIfFading($(this), number);
+					}
+				}
+				else {
+					if(!sticky){
+						Gritter._setFadeTimer($(this), number);
+					}
+				}
+				Gritter._hoverState($(this), event.type);
+			});
+			
+			// Clicking (X) makes the perdy thing close
+			$(item).find('.gritter-close').click(function(){
+				Gritter.removeSpecific(number, {}, null, true);
+				return false;
+			});
+			
+			return number;
+		
+		},
+		
+		/**
+		* If we don't have any more gritter notifications, get rid of the wrapper using this check
+		* @private
+		* @param {Integer} unique_id The ID of the element that was just deleted, use it for a callback
+		* @param {Object} e The jQuery element that we're going to perform the remove() action on
+		* @param {Boolean} manual_close Did we close the gritter dialog with the (X) button
+		*/
+		_countRemoveWrapper: function(unique_id, e, manual_close){
+			
+			// Remove it then run the callback function
+			e.remove();
+			this['_after_close_' + unique_id](e, manual_close);
+			
+			// Check if the wrapper is empty, if it is.. remove the wrapper
+			if($('.gritter-item-wrapper').length == 0){
+				$('#gritter-notice-wrapper').remove();
+			}
+		
+		},
+		
+		/**
+		* Fade out an element after it's been on the screen for x amount of time
+		* @private
+		* @param {Object} e The jQuery element to get rid of
+		* @param {Integer} unique_id The id of the element to remove
+		* @param {Object} params An optional list of params to set fade speeds etc.
+		* @param {Boolean} unbind_events Unbind the mouseenter/mouseleave events if they click (X)
+		*/
+		_fade: function(e, unique_id, params, unbind_events){
+
+			var params = params || {},
+				fade = (typeof(params.fade) != 'undefined') ? params.fade : true,
+				fade_out_speed = params.speed || this.fade_out_speed,
+				manual_close = unbind_events;
+
+			this['_before_close_' + unique_id](e, manual_close);
+			
+			// If this is true, then we are coming from clicking the (X)
+			if(unbind_events){
+				e.unbind('mouseenter mouseleave');
+			}
+			
+			// Fade it out or remove it
+			if(fade){
+			
+				e.animate({
+					opacity: 0
+				}, fade_out_speed, function(){
+					e.animate({ height: 0 }, 300, function(){
+						Gritter._countRemoveWrapper(unique_id, e, manual_close);
+					})
+				})
+				
+			}
+			else {
+				
+				this._countRemoveWrapper(unique_id, e);
+				
+			}
+						
+		},
+		
+		/**
+		* Perform actions based on the type of bind (mouseenter, mouseleave) 
+		* @private
+		* @param {Object} e The jQuery element
+		* @param {String} type The type of action we're performing: mouseenter or mouseleave
+		*/
+		_hoverState: function(e, type){
+			
+			// Change the border styles and add the (X) close button when you hover
+			if(type == 'mouseenter'){
+				
+				e.addClass('hover');
+				
+				// Show close button
+				e.find('.gritter-close').show();
+						
+			}
+			// Remove the border styles and hide (X) close button when you mouse out
+			else {
+				
+				e.removeClass('hover');
+				
+				// Hide close button
+				e.find('.gritter-close').hide();
+				
+			}
+			
+		},
+		
+		/**
+		* Remove a specific notification based on an ID
+		* @param {Integer} unique_id The ID used to delete a specific notification
+		* @param {Object} params A set of options passed in to determine how to get rid of it
+		* @param {Object} e The jQuery element that we're "fading" then removing
+		* @param {Boolean} unbind_events If we clicked on the (X) we set this to true to unbind mouseenter/mouseleave
+		*/
+		removeSpecific: function(unique_id, params, e, unbind_events){
+			
+			if(!e){
+				var e = $('#gritter-item-' + unique_id);
+			}
+
+			// We set the fourth param to let the _fade function know to 
+			// unbind the "mouseleave" event.  Once you click (X) there's no going back!
+			this._fade(e, unique_id, params || {}, unbind_events);
+			
+		},
+		
+		/**
+		* If the item is fading out and we hover over it, restore it!
+		* @private
+		* @param {Object} e The HTML element to remove
+		* @param {Integer} unique_id The ID of the element
+		*/
+		_restoreItemIfFading: function(e, unique_id){
+			
+			clearTimeout(this['_int_id_' + unique_id]);
+			e.stop().css({ opacity: '', height: '' });
+			
+		},
+		
+		/**
+		* Setup the global options - only once
+		* @private
+		*/
+		_runSetup: function(){
+		
+			for(opt in $.gritter.options){
+				this[opt] = $.gritter.options[opt];
+			}
+			this._is_setup = 1;
+			
+		},
+		
+		/**
+		* Set the notification to fade out after a certain amount of time
+		* @private
+		* @param {Object} item The HTML element we're dealing with
+		* @param {Integer} unique_id The ID of the element
+		*/
+		_setFadeTimer: function(e, unique_id){
+			
+			var timer_str = (this._custom_timer) ? this._custom_timer : this.time;
+			this['_int_id_' + unique_id] = setTimeout(function(){ 
+				Gritter._fade(e, unique_id);
+			}, timer_str);
+		
+		},
+		
+		/**
+		* Bring everything to a halt
+		* @param {Object} params A list of callback functions to pass when all notifications are removed
+		*/  
+		stop: function(params){
+			
+			// callbacks (if passed)
+			var before_close = ($.isFunction(params.before_close)) ? params.before_close : function(){};
+			var after_close = ($.isFunction(params.after_close)) ? params.after_close : function(){};
+			
+			var wrap = $('#gritter-notice-wrapper');
+			before_close(wrap);
+			wrap.fadeOut(function(){
+				$(this).remove();
+				after_close();
+			});
+		
+		},
+		
+		/**
+		* An extremely handy PHP function ported to JS, works well for templating
+		* @private
+		* @param {String/Array} search A list of things to search for
+		* @param {String/Array} replace A list of things to replace the searches with
+		* @return {String} sa The output
+		*/  
+		_str_replace: function(search, replace, subject, count){
+		
+			var i = 0, j = 0, temp = '', repl = '', sl = 0, fl = 0,
+				f = [].concat(search),
+				r = [].concat(replace),
+				s = subject,
+				ra = r instanceof Array, sa = s instanceof Array;
+			s = [].concat(s);
+			
+			if(count){
+				this.window[count] = 0;
+			}
+		
+			for(i = 0, sl = s.length; i < sl; i++){
+				
+				if(s[i] === ''){
+					continue;
+				}
+				
+				for (j = 0, fl = f.length; j < fl; j++){
+					
+					temp = s[i] + '';
+					repl = ra ? (r[j] !== undefined ? r[j] : '') : r[0];
+					s[i] = (temp).split(f[j]).join(repl);
+					
+					if(count && s[i] !== temp){
+						this.window[count] += (temp.length-s[i].length) / f[j].length;
+					}
+					
+				}
+			}
+			
+			return sa ? s : s[0];
+			
+		},
+		
+		/**
+		* A check to make sure we have something to wrap our notices with
+		* @private
+		*/  
+		_verifyWrapper: function(){
+		  
+			if($('#gritter-notice-wrapper').length == 0){
+				$('body').append(this._tpl_wrap);
+			}
+		
+		}
+		
+	}
+	
 })(jQuery);
 /**
  * Create a local storage parameter

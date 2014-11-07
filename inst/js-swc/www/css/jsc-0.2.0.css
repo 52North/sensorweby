@@ -150,10 +150,6 @@ body,html,.container,.row-offcanvas,.mainPanel {
     width: 100%;
 }
 
-/* .btn {
-        font-size: 18px;
-} */
-
 .timeButtons {
     position: absolute;
     left: 0;
@@ -192,7 +188,7 @@ body,html,.container,.row-offcanvas,.mainPanel {
 .button-right {
     float: right;
     margin-right: 10px;
-} 
+}
 
 .panel-group {
     padding: 5px;
@@ -206,6 +202,10 @@ body,html,.container,.row-offcanvas,.mainPanel {
     cursor: default;
 }
 
+.navbar-header-text {
+    margin-left: 10px;
+}
+
 .noChart {
     text-align: center;
     margin: 30px;
@@ -217,7 +217,6 @@ body,html,.container,.row-offcanvas,.mainPanel {
 
 .modal-title {
     height: 32px;
-    font-size: 18px;
     text-align: center;
     background-repeat: no-repeat;
     background-image: url("../images/favicon.ico");
@@ -298,7 +297,6 @@ a:hover {
 }
 
 .map-buttons .btn {
-    font-size: 18px;
     padding: 4px 10px;
 }
 
@@ -318,6 +316,10 @@ a:hover {
 
 .nav > li > a {
     padding: 6px 6px;
+}
+
+.tsItem {
+    word-break: break-all;
 }
 
 .tsItem .additionalInfo {
@@ -404,7 +406,7 @@ a:hover {
 
 .axisLabel {
     position: absolute;
-    font-size: 12px;
+    font-size: 90%;
     text-align: center;
 }
 
@@ -425,7 +427,12 @@ a:hover {
 
 .labelColorMarker {
     font-size: 150%;
-}/**
+}
+
+/*.flot-tick-label {
+    font-size: 150%;
+}*/
+/**
  * Copyright (C) 2014-2014 52°North Initiative for Geospatial Open Source
  * Software GmbH
  *
@@ -445,7 +452,8 @@ a:hover {
     text-align: center;
 }
 
-.resetStatus {
+.resetStatus,
+.saveStatus {
     margin-bottom: 5px;
 }
 
@@ -724,4 +732,70 @@ a:hover {
 .guidedtour .close {
     font-size: 15px;
     line-height: 0px;
+}/**
+ * Copyright (C) 2014-2014 52°North Initiative for Geospatial Open Source
+ * Software GmbH
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+.star {
+    margin-left: 5px;
+    cursor: pointer;
+}
+
+.favorites-import-export {
+    margin: 3px;
+}
+
+.btn-file {
+    position: relative;
+    overflow: hidden;
+}
+
+.btn-file input[type=file] {
+    position: absolute;
+    top: 0;
+    right: 0;
+    min-width: 100%;
+    min-height: 100%;
+    //font-size: 100px;
+    text-align: right;
+    filter: alpha(opacity=0);
+    opacity: 0;
+    outline: none;
+    background: white;
+    cursor: inherit;
+    display: block;
+}
+
+.favorite-header,
+.favorite-icons {
+    font-size: 120%;
+}
+
+.favorite-icons span {
+    margin-left: 3px;
+    cursor: pointer;
+}
+
+.favorite-entry {
+    border: 1px solid #AAA;
+    border-bottom: 3px solid #BBB;
+    padding: 7px;
+    margin: 15px;
+    word-break: break-all;
+}
+
+.favorite-group-entry {
+    margin: 0px 10px;
 }
