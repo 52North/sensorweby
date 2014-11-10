@@ -26,8 +26,12 @@
 # Public License for more details.
 #
 
+library(shiny)
+library(sensorweby)
+
 shinyUI(
   swcPage(
+    debug=TRUE,
     title="Shiny Sensor Web Client",
     author="Christian Autermann",
     description="Javascript Sensor Web Client Example for Shiny",

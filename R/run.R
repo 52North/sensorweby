@@ -67,7 +67,6 @@ run <- function(configFile = "js-swc/settings.yml") {
                   display.mode = getSetting(settings[["shiny"]], "display.mode", "auto"))
 }
 
-
 getSetting <- function(settings, option, default = NULL) {
     if(missing(default))
         return(settings[[option]])

@@ -180,142 +180,72 @@ swcPage <- function(...,
                     author=NULL,
                     description=NULL,
                     debug=FALSE) {
+    
+    
+    addResourcePath("sensorweby", system.file("www/sensorweby", package="sensorweby"))
 
-  imports <- list(
-    HTML('<!--[if lt IE 9]>'),
-    tags$script(
-      type="text/javascript",
-      src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"
-    ),
-    tags$script(
-      type="text/javascript",
-      src="https://oss.maxcdn.com/libs/respond.js/1.3.0/respond.min.js"
-    ),
-    HTML('<![endif]-->'),
+    for (name in c("css", "fonts", "images", "js", "templates")) {
+        addResourcePath(name, system.file(paste0("www/jsc/", name), package="sensorweby"))
+    }
+    
+    ext <- ifelse(debug, ".js", ".min.js")
 
-    tags$script(
-      type="text/javascript",
-      src="shared/selectize/js/selectize.min.js"
-    ),
-    tags$script(
-        type="text/javascript",
-        src="js/isTouchOrIsMobile.js"
-    ),
-    tags$script(
-      type="text/javascript",
-      src="js/jsc-0.2.0.deps.min.js"
-    ),
-    tags$script(
-      type="text/javascript",
-      src="js/jsc-0.2.0.min.js"
-    ),
-    tags$script(
-      type="text/javascript",
-      src="js/jsc-shiny.js"
-    ),
-    tags$link(
-      rel="stylesheet",
-      type="text/css",
-      href="css/jsc-0.2.0.deps.min.css"
-    ),
-    tags$link(
-      rel="stylesheet",
-      type="text/css",
-      href="css/jsc-0.2.0.min.css"
+    head <- tags$head(
+        if (!is.null(title)) tags$title(title),
+        if (!is.null(description)) tags$meta(name="description", content=description),
+        if (!is.null(author)) tags$meta(name="author", content=author),
+        tags$meta("http-equiv"="Content-Type", content="text/html; charset=utf-8"),
+        tags$meta("http-equiv"="X-UA-Compatible", content="IE=edge"),
+        tags$link(rel="stylesheet", type="text/css", href="css/jsc-0.2.0.deps.min.css"),
+        tags$link(rel="stylesheet", type="text/css", href="css/jsc-0.2.0.min.css"),
+        HTML('<!--[if lt IE 9]>'),
+        tags$script(src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"),
+        tags$script(src="https://oss.maxcdn.com/libs/respond.js/1.3.0/respond.min.js"),
+        HTML('<![endif]-->'),
+        tags$script(sprintf("var DEBUG = !!%i;", debug)),
+        tags$script(src="sensorweby/isTouchOrIsMobile.js"),
+        tags$script(src=sprintf("js/jsc-0.2.0.deps%s", ext)),
+        tags$script(src=sprintf("js/jsc-0.2.0%s", ext)),
+        tags$script(src="sensorweby/sensorweby.js")
     )
-  );
+    
+    body <- tags$body(tags$div(class="jsc-main swc-main", .analysisPage(...)))
+    tags$html(lang="en", head, body)
+}
 
+.navbarBtn <- function(href, icon, caption=NULL){
+    tags$a(class="btn btn-default navbar-btn button-right",
+           "data-target"=href,
+           href=href,
+           type="button",
+           if (!is.null(icon)) tags$span(class=paste("glyphicon", icon)),
+           if (!is.null(caption)) tags$span(class="buttonCaption", caption))
+}
 
-  head <- tags$head(
-    if (!is.null(title)) tags$title(title),
-    if (!is.null(description)) tags$meta(name="description", content=description),
-    if (!is.null(author)) tags$meta(name="author", content=author),
-    tags$meta(
-      "http-equiv"="Content-Type",
-      content="text/html; charset=utf-8"
-    ),
-    tags$meta(
-      "http-equiv"="X-UA-Compatible",
-      content="IE=edge"
-    ),
+.navbar <- function(caption, icon, ...) {
+    tags$div(class="navbar navbar-fixed-top",
+             role="navigation",
+             tags$div(class="container-fluid",
+                      tags$div(class="navbar-header analysis",
+                               tags$span(class="navbar-brand",
+                                         tags$span(class=paste("glyphicon", icon)),
+                                         tags$span(caption)),
+                               list(...))))
+}
 
-    imports,
-
-    tags$script(
-      type="text/javascript",
-      sprintf("var DEBUG = !!%i;", debug)
-    )
-  );
-
-  navigation <- list(
-    tags$span(
-      class="navbar-brand",
-      tags$span(class="glyphicon glyphicon-stats"),
-      tags$span("{{_i}}main.analysisView{{/i}}")
-    ),
-    tags$a(
-      class="btn btn-default navbar-btn button-right",
-      "data-target"="#chart",
-      href="#chart",
-      type="button",
-      tags$span(class="glyphicon glyphicon-stats"),
-      tags$span(class="buttonCaption", "{{_i}}main.chartView{{/i}}")
-    ),
-    tags$a(
-      class="btn btn-default navbar-btn button-right",
-      "data-target"="#map",
-      href="#map",
-      type="button",
-      tags$span(class="glyphicon glyphicon-globe"),
-      tags$span(class="buttonCaption", "{{_i}}main.mapView{{/i}}")
-    ),
-    tags$a(
-      class="btn btn-default navbar-btn button-right",
-      "data-target"="#settings",
-      href="#settings",
-      type="button",
-      tags$span(class="glyphicon glyphicon-cog"),
-      tags$span(class="buttonCaption", "{{_i}}main.settings{{/i}}")
-    ),
-    tags$a(
-      class="btn btn-default navbar-btn button-right",
-      "data-target"="#tour",
-      href="#tour",
-      type="button",
-      tags$span(class="glyphicon glyphicon-question-sign")
-    )
-  );
-
-
-  body <- tags$body(
-    tags$div(
-      class="jsc-main swc-main",
-      tags$div(
-        class="swc-page",
-        id="analysis-page",
-        tags$div(
-          class="navbar navbar-fixed-top",
-          role="navigation",
-          tags$div(
-            class="container-fluid",
-            tags$div(
-              class="navbar-header analysis",
-              navigation
-            )
-          )
-        ),
-        tags$div(
-          class="container-fluid content",
-          tags$div(
-            class="row fullHeight",
-            list(...)
-          )
-        )
-      )
-    )
-  );
-
-  tags$html(lang="en",head,body);
+.analysisPage <- function(...) {
+    chartView <- .navbarBtn("#chart", "glyphicon-stats", "{{_i}}main.chartView{{/i}}")
+    mapView <- .navbarBtn("#map", "glyphicon-globe", "{{_i}}main.mapView{{/i}}")
+    settings <- .navbarBtn("#settings", "glyphicon-cog", "{{_i}}main.settings{{/i}}")
+    tour <- .navbarBtn("#tour", "glyphicon-question-sign")
+    
+    navbar <- .navbar("{{_i}}main.analysisView{{/i}}", "glyphicon-stats",
+                        chartView, mapView, settings, tour)
+    tags$div(class="swc-page",
+             id="analysis-page",
+             navbar,
+             tags$div(class="container-fluid content", 
+                      tags$div(class="row fullHeight", list(...))))
 }
 
 #' Install JavaScript SensorWebClient
@@ -325,6 +255,7 @@ swcPage <- function(...,
 #' @param owner the GitHub repository owner
 #' @param repo the GitHub repository name
 #' @param version the version that should be installed
+#' @export
 #' @examples
 #' \dontrun{installSensorWebClient()}
 installSensorWebClient <- function(owner = '52North', repo = 'js-sensorweb-client',
@@ -332,18 +263,13 @@ installSensorWebClient <- function(owner = '52North', repo = 'js-sensorweb-clien
     basePath <- devtools::as.package('.')$path
     tmpDir <- tempfile(pattern = 'swc-temp-dir')
     dir.create(tmpDir, recursive=TRUE)
-    swcDir <- file.path(basePath, 'inst', 'js-swc')
+    wwwDir <- file.path(basePath, 'inst', 'www')
 
     zipFile <- .downloadSensorWebClientZipFile(owner, repo, version, tmpDir)
     projectDir <- .extractSensorWebClientZipFile(zipFile, tmpDir)
     distFile <- .buildSensorWebClient(projectDir, tmpDir)
 
-    .replaceExistingSensorWebClientInstallation(distFile, tmpDir, swcDir)
-
-    file.copy(from = file.path(basePath, 'inst', 'jsc-shiny.js'),
-              to = file.path(swcDir, 'www', 'js'))
-    file.copy(from = file.path(basePath, 'inst', 'isTouchOrIsMobile.js'),
-              to = file.path(swcDir, 'www', 'js'))
+    .replaceExistingSensorWebClientInstallation(distFile, tmpDir, wwwDir)
 
     futile.logger::flog.trace("Deleting %s", tmpDir)
     unlink(tmpDir, recursive = TRUE)
@@ -356,6 +282,7 @@ installSensorWebClient <- function(owner = '52North', repo = 'js-sensorweb-clien
 #' @param owner the GitHub repository owner
 #' @param repo the GitHub repository name
 #' @return the latest version or 'develop'
+#' @export
 #' @examples
 #' \dontrun{
 #'  installSensorWebClient()
@@ -371,13 +298,15 @@ getLatestSensorWebClientTag <- function(owner = '52North', repo = 'js-sensorweb-
     return(sapply(tags$content, function(x) x$name))
 }
 
-.replaceExistingSensorWebClientInstallation <- function (distFile, tmpDir, swcDir) {
-    futile.logger::flog.trace("Deleting %s", file.path(swcDir, 'www'))
-    unlink(file.path(swcDir, 'www'), recursive = TRUE)
+.replaceExistingSensorWebClientInstallation <- function (distFile, tmpDir, wwwDir) {
+    jscDir <- file.path(wwwDir, 'jsc')
+    futile.logger::flog.trace("Deleting %s", jscDir)
+    unlink(jscDir, recursive = TRUE)
+    
     futile.logger::flog.trace("Extracting %s to %s", distFile, tmpDir)
     untar(tarfile = distFile, exdir = tmpDir, compressed = TRUE)
-    file.copy(from = Sys.glob(file.path(tmpDir, 'jsClient-*')), to = swcDir, recursive = TRUE)
-    file.rename(from = Sys.glob(file.path(swcDir, 'jsClient-*')), to = file.path(swcDir, 'www'))
+    file.copy(from = Sys.glob(file.path(tmpDir, 'jsClient-*')), to = wwwDir, recursive = TRUE)
+    file.rename(from = Sys.glob(file.path(wwwDir, 'jsClient-*')), to = jscDir)
 }
 
 .extractSensorWebClientZipFile <- function(zipFile, tmpDir) {
