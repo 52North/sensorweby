@@ -28,7 +28,7 @@ $(function() {
   ShinyController.prototype.getTimeseries = function() {
     var timeseries = [];
     $.each(TimeSeriesController.getTimeseriesCollection(), function(id, ts) {
-      timeseries.push(ts.getApiUrl() + ts.getTsId());
+      timeseries.push(ts.getApiUrl() + "timeseries/" + ts.getTsId());
     });
     return timeseries;
   };
