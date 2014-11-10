@@ -53,9 +53,6 @@ shinyUI(
       tags$label(class="control-label", "Time Series"),
       htmlOutput("timeseries"),
       
-      tags$label(class="control-label", "Nearest Station"),
-      htmlOutput("timeseries"),
-      
       tags$label(class="control-label", "Begin Time"),
       htmlOutput("begin"),
       

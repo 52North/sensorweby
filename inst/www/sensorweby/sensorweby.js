@@ -266,7 +266,7 @@ $(function() {
 
 
   $.getJSON("settings.json", function(json) {
-    StartController.init($.extend({}, json));
+    StartController.init(json);
     $(document).ready(function(){
       $('[data-target="#analysis"]').click(function(){
         Pages.navigateToStatistics();

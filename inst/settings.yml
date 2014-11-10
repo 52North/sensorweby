@@ -1,4 +1,4 @@
-# Shiny - related configuration, settings are using in function runApp, see http://shiny.rstudio.com/reference/shiny/latest/runApp.html 
+# Shiny - related configuration, settings are using in function runApp, see http://shiny.rstudio.com/reference/shiny/latest/runApp.html
 shiny:
     appDir: js-swc
     host: 127.0.0.1
