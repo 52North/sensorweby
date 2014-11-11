@@ -123,7 +123,7 @@ run <- function(directory) {
 #' @param key the settings key
 #' @param default an optional default value
 #' 
-#' @returns the key
+#' @return the key
 #' @examples
 #' \dontrun{
 #' getSetting("shiny.host")
