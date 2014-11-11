@@ -26,38 +26,41 @@
 # Public License for more details.
 #
 
-shinyUI(
-  swcPage(
+shiny::shinyUI(
+  sensorweby::swcPage(
     title="Shiny Sensor Web Client",
     author="Christian Autermann",
     description="Javascript Sensor Web Client Example for Shiny",
     
-    swcLeftPanel(
+    sensorweby::swcLeftPanel(
       plotOutput("pollutionRose", width="100%", height="100%")
     ),
     
-    swcRightPanel(
+    sensorweby::swcRightPanel(
       header="Parameters",
       
-      selectInput(
+      shiny::selectInput(
         "pollutant", 
         label="Pollutant",
         choices = c("NOX", "NO2", "O3", "PM10", "SO2", "CO", "PM25"),
         selected = "NOX"
       ),
       
-      swcTimeBeginInput("begin"),
-      swcTimeEndInput("end"),
-      swcTimeseriesInput("series"),
+      sensorweby::swcTimeBeginInput("begin"),
+      sensorweby::swcTimeEndInput("end"),
+      sensorweby::swcTimeseriesInput("series"),
       
-      tags$label(class="control-label", "Time Series"),
-      htmlOutput("timeseries"),
+      htmltools::tags$label(class="control-label", "Time Series"),
+      shiny::htmlOutput("timeseries"),
       
-      tags$label(class="control-label", "Begin Time"),
-      htmlOutput("begin"),
+      htmltools::tags$label(class="control-label", "Begin Time"),
+      shiny::htmlOutput("begin"),
       
-      tags$label(class="control-label", "End Time"),
-      htmlOutput("end")
+      htmltools::tags$label(class="control-label", "End Time"),
+      shiny::htmlOutput("end"),
+      
+      htmltools::tags$label(class="control-label", "Nearest Stations"),
+      shiny::htmlOutput("nearest_stations")
     )
   )
-);
+)

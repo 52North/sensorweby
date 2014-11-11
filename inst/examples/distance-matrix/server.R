@@ -26,46 +26,74 @@
 # Public License for more details.
 #
 
-library(sensorweby)
-library(openair)
-library(sensorweb4R)
-library(futile.logger)
-
 formatTime <- function(x) {
     if (is.null(x) || is.na(x)) x else format(x, "%Y-%m-%dT%H:%M:%OS3")
 }
 
-url <- 'http://sensorweb.demo.52north.org/sensorwebclient-webapp-stable'
+url <- 'http://sosrest.irceline.be'
 service <- 'srv_6d9ccea8d609ecb74d4a512922bb7cee'
 
-flog.info("Requesting stations")
-stations <- get_stations(url, service = service)
+futile.logger::flog.info("Requesting stations")
+stations <- sensorweb4R::get_stations(url, service = service)
 
-flog.info("Creating distance matrix ...")
-dm <- create_distance_matrix(stations)
+futile.logger::flog.info("Creating distance matrix ...")
+dm <- sensorweb4R::create_distance_matrix(stations)
+
+get_station_for_timeseries <- function(ts_url) {
+    response <- httr::GET(ts_url)
+    httr::stop_for_status(response)
+    json <- jsonlite::fromJSON(httr::content(response, "text"))
+    return(json$station$properties$id)
+}
+
+get_nearest_station_for_timeseries <- function(ts_url, ...) {
+    futile.logger::flog.info("Requesting station for TS %s", ts_url)
+    station <- get_station_for_timeseries(ts_url)
+    futile.logger::flog.info("Requesting nearest stations for station %s", station)
+    return(sensorweb4R::get_nearest_stations(station, ...))
+}
+
 
 # function is called once each session
-shinyServer(func = function(input, output, session) {
-    flog.debug("New session at server.") # is false: %s", toString(serverInfo()))
+shiny::shinyServer(func = function(input, output, session) {
+    futile.logger::flog.debug("New session at server.") # is false: %s", toString(serverInfo()))
     
     # only works in reactive environment..
-    #flog.debug("New session: %s", toString(paste(names(as.list(session$clientData)), as.list(session$clientData), sep = ": ")))
+    #futile.logger::flog.debug("New session: %s", toString(paste(names(as.list(session$clientData)), as.list(session$clientData), sep = ": ")))
     
-    output$begin <- renderText({
+    output$begin <- shiny::renderText({
         formatTime(input$begin);
     });
     
-    output$end <- renderText({
+    output$end <- shiny::renderText({
         formatTime(input$end);
     });
     
-    output$timeseries <- renderUI({
+    output$timeseries <- shiny::renderUI({
         if (length(input$series) == 0) "NA" 
-        else tags$ul(lapply(input$series, tags$li))
+        else htmltools::tags$ul(lapply(input$series, htmltools::tags$li))
     });
     
-    output$pollutionRose <- renderPlot({
-        flog.trace("Rendering plot for %s", input$pollutant)
+    output$nearest_stations <- shiny::renderUI({
+        if (length(input$series) == 0) {
+            return("NA" )
+        } else {
+            
+            items <- lapply(input$series, function(ts) {
+                nearest <- get_nearest_station_for_timeseries(ts, stations, dm, n=5)
+                text <- sprintf("%s (%s)", nearest@data$label, nearest@data$id)
+                items <- lapply(text, htmltools::tags$li)
+                list <- htmltools::tags$ul(items)
+                return(htmltools::tags$li(ts, list))
+            })
+            
+            return(htmltools::tags$ul(items))
+        }
+        
+    })
+    
+    output$pollutionRose <- shiny::renderPlot({
+        futile.logger::flog.trace("Rendering plot for %s", input$pollutant)
         
         pollutant <- switch(input$pollutant, 
                             NOX="nox",
@@ -75,7 +103,7 @@ shinyServer(func = function(input, output, session) {
                             SO2="so2",
                             CO="co",
                             PM25="pm25");
-        pollutionRose(mydata, pollutant = pollutant, year = 2001);
+        openair::pollutionRose(openair::mydata, pollutant = pollutant, year = 2001);
     });
 
 });
