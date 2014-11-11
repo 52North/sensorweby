@@ -58,6 +58,15 @@ run <- function(directory) {
                   quiet = quiet, display.mode = display.mode)
 }
 
+#' @export
+runExample <- function(name) {
+    dir <- system.file(paste0("examples/", name), package="sensorweby")
+    if (!file.exists(dir)) {
+        stop("Not a valid example")
+    }
+    run(dir)
+}
+
 .loadYAML <- function(file) {
     if (is.null(file) || !file.exists(file)) {
         return(list())
@@ -124,6 +133,7 @@ run <- function(directory) {
 #' @param default an optional default value
 #' 
 #' @return the key
+#' @export
 #' @examples
 #' \dontrun{
 #' getSetting("shiny.host")

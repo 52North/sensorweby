@@ -53,7 +53,6 @@ get_nearest_station_for_timeseries <- function(ts_url, ...) {
     return(sensorweb4R::get_nearest_stations(station, ...))
 }
 
-
 # function is called once each session
 shiny::shinyServer(func = function(input, output, session) {
     futile.logger::flog.debug("New session at server.") # is false: %s", toString(serverInfo()))

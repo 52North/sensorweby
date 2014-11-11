@@ -1,0 +1,4 @@
+timeseriesapi:
+    endpoint: http://sosrest.irceline.be
+    filters:
+        service: srv_6d9ccea8d609ecb74d4a512922bb7cee
