@@ -1,36 +1,22 @@
-# Copyright (C) 2014 52°North Initiative for Geospatial Open Source
-# Software GmbH
+# Copyright 2014 52°North Initiative for Geospatial Open Source Software GmbH
 #
-# This program is free software; you can redistribute it and/or modify it
-# under the terms of the GNU General Public License version 2 as published
-# by the Free Software Foundation.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
 #
-# If the program is linked with libraries which are licensed under one of
-# the following licenses, the combination of the program with the linked
-# library is not considered a "derivative work" of the program:
+#     http://www.apache.org/licenses/LICENSE-2.0
 #
-#     - Apache License, version 2.0
-#     - Apache Software License, version 1.0
-#     - GNU Lesser General Public License, version 3
-#     - Mozilla Public License, versions 1.0, 1.1 and 2.0
-#     - Common Development and Distribution License (CDDL), version 1.0
-#
-# Therefore the distribution of the program linked with libraries licensed
-# under the aforementioned licenses, is permitted by the copyright holders
-# if the distribution is compliant with both the GNU General Public
-# License version 2 and the aforementioned licenses.
-#
-# This program is distributed in the hope that it will be useful, but
-# WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
-# Public License for more details.
-#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
 
 #' Run shiny sensor web client
-#' 
+#'
 #' \code{run} starts the Shiny application with an advanced JavaScript sensor web client
-#' 
+#'
 #' @examples
 #' \dontrun{
 #'  run()
@@ -40,20 +26,20 @@
 #' @export
 run <- function(directory) {
     options("sensorweby.settingsFile" = file.path(directory, "settings.yml"))
-    
+
     futile.logger::flog.info("Starting sensorweby ...")
 
     .configureLogging()
-    
+
     # configure app
     futile.logger::flog.info("Starting sensorweby at %s", toString(directory))
-    
+
     host <- getOption("shiny.host", "127.0.0.1")
     host <- getSetting("shiny.host", host)
     port <- getSetting("shiny.port")
     quiet <- getSetting("shiny.quiet", FALSE)
     display.mode <- getSetting("shiny.display-mode", "auto")
-    
+
     shiny::runApp(appDir = directory, port = port, host = host,
                   quiet = quiet, display.mode = display.mode)
 }
@@ -75,16 +61,16 @@ runExample <- function(name) {
 }
 
 #'
-#' Merges to list by adding properties of \code{y}t o \code{x} if they are not 
+#' Merges to list by adding properties of \code{y}t o \code{x} if they are not
 #' present, overwriting properties of \code{x} with the values of \code{y},
 #' if \code{x} or \code{y} are not lists, and applying the function recursive to
 #' properties that are lists in both \code{x} and \code{y}.
-#' 
+#'
 #' @param x the target list
 #' @param y the source list
-#' 
+#'
 #' @return \code{x} with properties of \code{y}
-#' 
+#'
 .extend <- function(x, y) {
     if (!is.list(x) || !is.list(y)) return(y)
     xnames <- names(x)
@@ -109,10 +95,10 @@ runExample <- function(name) {
 
 #'
 #' Loads the settings for the sensorweby application if and only if the option
-#' \code{sensorweby.settings} is \code{NULL}. If the settings are not yet 
+#' \code{sensorweby.settings} is \code{NULL}. If the settings are not yet
 #' present the default configuration is loaded and merged with a custom config
 #' file that may be set using the \code{sensorweby.settingsFile} option.
-#' 
+#'
 #' @return a list containing the settings
 #'
 .loadSettings <- function() {
@@ -128,10 +114,10 @@ runExample <- function(name) {
 #'
 #' Gets the setting specified by \code{key}. The key is a string containing the
 #' complete path to the setting, where properties are seperated using a \code{.}.
-#' 
+#'
 #' @param key the settings key
 #' @param default an optional default value
-#' 
+#'
 #' @return the key
 #' @export
 #' @examples
@@ -154,17 +140,17 @@ getSetting <- function(key, default=NULL) {
 
 getLoglevelForName <- function(x) {
     # remove leading/trailing whitespace
-    name <- gsub("^\\s+|\\s+$", "", x) 
+    name <- gsub("^\\s+|\\s+$", "", x)
     name <- tolower(name)
-    
-    level <- switch(name, 
+
+    level <- switch(name,
                     "trace" = futile.logger::TRACE,
                     "debug" = futile.logger::DEBUG,
                     "warn" = futile.logger::WARN,
                     "info" = futile.logger::INFO,
                     "error" = futile.logger::ERROR,
                     "fatal" = futile.logger::FATAL)
-    
+
     if (is.null(level)) {
         warning(paste0("Could not infer level from ", x))
         return(futile.logger::INFO)

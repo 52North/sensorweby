@@ -1,30 +1,16 @@
-# Copyright (C) 2014 52°North Initiative for Geospatial Open Source
-# Software GmbH
+# Copyright 2014 52°North Initiative for Geospatial Open Source Software GmbH
 #
-# This program is free software; you can redistribute it and/or modify it
-# under the terms of the GNU General Public License version 2 as published
-# by the Free Software Foundation.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
 #
-# If the program is linked with libraries which are licensed under one of
-# the following licenses, the combination of the program with the linked
-# library is not considered a "derivative work" of the program:
+#     http://www.apache.org/licenses/LICENSE-2.0
 #
-#     - Apache License, version 2.0
-#     - Apache Software License, version 1.0
-#     - GNU Lesser General Public License, version 3
-#     - Mozilla Public License, versions 1.0, 1.1 and 2.0
-#     - Common Development and Distribution License (CDDL), version 1.0
-#
-# Therefore the distribution of the program linked with libraries licensed
-# under the aforementioned licenses, is permitted by the copyright holders
-# if the distribution is compliant with both the GNU General Public
-# License version 2 and the aforementioned licenses.
-#
-# This program is distributed in the hope that it will be useful, but
-# WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
-# Public License for more details.
-#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
 library("shiny")
 
@@ -180,14 +166,14 @@ swcPage <- function(...,
                     author=NULL,
                     description=NULL,
                     debug=FALSE) {
-    
-    
+
+
     addResourcePath("sensorweby", system.file("www/sensorweby", package="sensorweby"))
 
     for (name in c("css", "fonts", "images", "js", "templates")) {
         addResourcePath(name, system.file(paste0("www/jsc/", name), package="sensorweby"))
     }
-    
+
     ext <- ifelse(debug, ".js", ".min.js")
 
     head <- tags$head(
@@ -208,7 +194,7 @@ swcPage <- function(...,
         tags$script(src=sprintf("js/jsc-0.2.0%s", ext)),
         tags$script(src="sensorweby/sensorweby.js")
     )
-    
+
     body <- tags$body(tags$div(class="jsc-main swc-main", .analysisPage(...)))
     tags$html(lang="en", head, body)
 }
@@ -238,13 +224,13 @@ swcPage <- function(...,
     mapView <- .navbarBtn("#map", "glyphicon-globe", "{{_i}}main.mapView{{/i}}")
     settings <- .navbarBtn("#settings", "glyphicon-cog", "{{_i}}main.settings{{/i}}")
     tour <- .navbarBtn("#tour", "glyphicon-question-sign")
-    
+
     navbar <- .navbar("{{_i}}main.analysisView{{/i}}", "glyphicon-stats",
                         chartView, mapView, settings, tour)
     tags$div(class="swc-page",
              id="analysis-page",
              navbar,
-             tags$div(class="container-fluid content", 
+             tags$div(class="container-fluid content",
                       tags$div(class="row fullHeight", list(...))))
 }
 
@@ -302,7 +288,7 @@ getLatestSensorWebClientTag <- function(owner = '52North', repo = 'js-sensorweb-
     jscDir <- file.path(wwwDir, 'jsc')
     futile.logger::flog.trace("Deleting %s", jscDir)
     unlink(jscDir, recursive = TRUE)
-    
+
     futile.logger::flog.trace("Extracting %s to %s", distFile, tmpDir)
     untar(tarfile = distFile, exdir = tmpDir, compressed = TRUE)
     file.copy(from = Sys.glob(file.path(tmpDir, 'jsClient-*')), to = wwwDir, recursive = TRUE)
