@@ -63,6 +63,24 @@ swcTimeseriesInput <- function(id) {
   tags$input(class="jsc-timeseries", type="hidden", "data-input-id"=id)
 }
 
+#' Time Interval Input
+#'
+#' \code{swcIntervalInput} adds a new reactive input that contains the 
+#' currently selected timespan for the JavaScript SensorWebClient as a 
+#' lubridate interval.
+#'
+#' @param id the id of the input
+#' @return a HTML \code{input} tag
+#' @export
+#' @import lubridate
+#' @examples
+#' \dontrun{
+#'  swcIntervalInput('time')
+#' }
+swcIntervalInput <- function(id) {
+    tags$input(class="jsc-time-interval", type="hidden", "data-input-id"=id)
+}
+
 #' I18N Definition
 #'
 #' \code{swcI18N} adds a new I18N value to the JavaScript SensorWebClient.
@@ -96,6 +114,24 @@ swcI18N <- function(lang, key, value) {
 #' }
 swcLeftPanel <- function(...) {
   tags$div(class="col-xs-12 col-sm-8 col-lg-9 fullHeight", list(...))
+}
+
+#' Full Panel Definition
+#'
+#' \code{swcLeftPanel} creates the full panel fo the analysis view of the
+#' JavaScript SensorWebClient.
+#'
+#' @inheritParams shiny::tag
+#' @return a HTML \code{div} tag for the full-size panel
+#' @export
+#' @examples
+#' \dontrun{
+#' swcLeftPanel(
+#'   plotOutput("output", width="100%", height="100%")
+#' )
+#' }
+swcFullPanel <- function(...) {
+    tags$div(class="col-xs-12 col-sm-12 col-lg-12 fullHeight", list(...))
 }
 
 #' Right Panel Definition
