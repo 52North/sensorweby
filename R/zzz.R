@@ -12,11 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-.timeInputHandler <- function(x, shinysession, name) {
-    if (is.null(x)) return(NA);
-    if (is.numeric(x)) return(as.POSIXct(x, origin="1970-01-01", tz="UTC"));
-    return(strptime(x, "%Y-%m-%dT%H:%M:%OS", tz = "UTC"));
-}
 
 .onLoad <- function(libname, pkgname) {
     shiny::registerInputHandler("n52.datetime", .timeInputHandler);
