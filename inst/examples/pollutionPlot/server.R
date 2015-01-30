@@ -22,15 +22,17 @@ flog.threshold(futile.logger::DEBUG, name = "sensorweb4R")
 flog.threshold(futile.logger::DEBUG)
 
 endpoint <- example.endpoints()[2]
+flog.debug("Searching for wind phenomenons")
 phe.all <- phenomena(endpoint)
 phe.ws <- phe.all[names(phe.all) == "61110 - WSP-SCA"]
 phe.wd <- phe.all[names(phe.all) == "61102 - DD"]
 
-
+flog.debug("Searching for stations with wind data")
 sta.ws <- stations(endpoint, phenomenon = phe.ws)
 sta.wd <- stations(endpoint, phenomenon = phe.wd)
 sta.wind <- sta.ws[match(id(sta.ws), id(sta.wd))]
 
+flog.debug("Building distance matrix")
 sta.all <- stations(endpoint)
 dm <- distanceMatrix(sta.all)
 
