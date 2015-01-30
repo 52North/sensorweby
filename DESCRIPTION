@@ -22,7 +22,8 @@ Imports:
     shiny,
     futile.logger,
     openair,
-    yaml
+    yaml,
+    sensorweb4R
 Suggests:
     github,
     RCurl

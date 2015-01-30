@@ -63,6 +63,24 @@ swcTimeseriesInput <- function(id) {
   tags$input(class="jsc-timeseries", type="hidden", "data-input-id"=id)
 }
 
+#' Time Interval Input
+#'
+#' \code{swcIntervalInput} adds a new reactive input that contains the 
+#' currently selected timespan for the JavaScript SensorWebClient as a 
+#' lubridate interval.
+#'
+#' @param id the id of the input
+#' @return a HTML \code{input} tag
+#' @export
+#' @import lubridate
+#' @examples
+#' \dontrun{
+#'  swcIntervalInput('time')
+#' }
+swcIntervalInput <- function(id) {
+    tags$input(class="jsc-time-interval", type="hidden", "data-input-id"=id)
+}
+
 #' I18N Definition
 #'
 #' \code{swcI18N} adds a new I18N value to the JavaScript SensorWebClient.
@@ -77,7 +95,7 @@ swcTimeseriesInput <- function(id) {
 #'  swcI18N('eng', 'button_label', 'OK')
 #' }
 swcI18N <- function(lang, key, value) {
-  tags$script(type="text/javascript", sprintf("i18n.%s.%s = '%s'", lang, key, value));
+  tags$script(type="text/javascript", sprintf("i18n.%s.%s = '%s'", lang, key, value))
 }
 
 #' Left Panel Definition
@@ -95,7 +113,25 @@ swcI18N <- function(lang, key, value) {
 #' )
 #' }
 swcLeftPanel <- function(...) {
-  tags$div(class="col-xs-12 col-sm-8 col-lg-9 fullHeight", list(...));
+  tags$div(class="col-xs-12 col-sm-8 col-lg-9 fullHeight", list(...))
+}
+
+#' Full Panel Definition
+#'
+#' \code{swcLeftPanel} creates the full panel fo the analysis view of the
+#' JavaScript SensorWebClient.
+#'
+#' @inheritParams shiny::tag
+#' @return a HTML \code{div} tag for the full-size panel
+#' @export
+#' @examples
+#' \dontrun{
+#' swcLeftPanel(
+#'   plotOutput("output", width="100%", height="100%")
+#' )
+#' }
+swcFullPanel <- function(...) {
+    tags$div(class="col-xs-12 col-sm-12 col-lg-12 fullHeight", list(...))
 }
 
 #' Right Panel Definition
@@ -140,7 +176,7 @@ swcRightPanel <- function(header, ...) {
     ),
     tags$style(type="text/css", '#analysis-sidebar.active {background: rgba(66, 139, 202, 0.5);}')
   )
-};
+}
 
 #' JavaScript SensorWebClient Page Definition
 #'
@@ -232,87 +268,4 @@ swcPage <- function(...,
              navbar,
              tags$div(class="container-fluid content",
                       tags$div(class="row fullHeight", list(...))))
-}
-
-#' Install JavaScript SensorWebClient
-#'
-#' \code{installSensorWebClient} downloads, builds and installs the JavaScript SensorWebClient.
-#'
-#' @param owner the GitHub repository owner
-#' @param repo the GitHub repository name
-#' @param version the version that should be installed
-#' @export
-#' @examples
-#' \dontrun{installSensorWebClient()}
-installSensorWebClient <- function(owner = '52North', repo = 'js-sensorweb-client',
-                                   version = getLatestSensorWebClientTag()) {
-    basePath <- devtools::as.package('.')$path
-    tmpDir <- tempfile(pattern = 'swc-temp-dir')
-    dir.create(tmpDir, recursive=TRUE)
-    wwwDir <- file.path(basePath, 'inst', 'www')
-
-    zipFile <- .downloadSensorWebClientZipFile(owner, repo, version, tmpDir)
-    projectDir <- .extractSensorWebClientZipFile(zipFile, tmpDir)
-    distFile <- .buildSensorWebClient(projectDir, tmpDir)
-
-    .replaceExistingSensorWebClientInstallation(distFile, tmpDir, wwwDir)
-
-    futile.logger::flog.trace("Deleting %s", tmpDir)
-    unlink(tmpDir, recursive = TRUE)
-}
-
-#' Get latest JavaScript SensorWebClient version
-#'
-#' \code{getLatestSensorWebClientTag} retrieves the latest tag on GitHub or 'develop' if no tags are found.
-#'
-#' @param owner the GitHub repository owner
-#' @param repo the GitHub repository name
-#' @return the latest version or 'develop'
-#' @export
-#' @examples
-#' \dontrun{
-#'  installSensorWebClient()
-#' }
-getLatestSensorWebClientTag <- function(owner = '52North', repo = 'js-sensorweb-client') {
-    tags = .getAllSensorWebClientTags(owner, repo)
-    return(ifelse(length(tags) == 0, 'develop', tags[[1]]))
-}
-
-.getAllSensorWebClientTags <- function(owner = '52North', repo = 'js-sensorweb-client') {
-    # devtools::install_github('cscheid/rgithub')
-    tags = github::get.repository.tags(owner, repo)
-    return(sapply(tags$content, function(x) x$name))
-}
-
-.replaceExistingSensorWebClientInstallation <- function (distFile, tmpDir, wwwDir) {
-    jscDir <- file.path(wwwDir, 'jsc')
-    futile.logger::flog.trace("Deleting %s", jscDir)
-    unlink(jscDir, recursive = TRUE)
-
-    futile.logger::flog.trace("Extracting %s to %s", distFile, tmpDir)
-    untar(tarfile = distFile, exdir = tmpDir, compressed = TRUE)
-    file.copy(from = Sys.glob(file.path(tmpDir, 'jsClient-*')), to = wwwDir, recursive = TRUE)
-    file.rename(from = Sys.glob(file.path(wwwDir, 'jsClient-*')), to = jscDir)
-}
-
-.extractSensorWebClientZipFile <- function(zipFile, tmpDir) {
-    base <- unzip(zipFile, list = TRUE)$Name[1]
-    futile.logger::flog.trace("Extracting %s to %s", zipFile, tmpDir);
-    unzip(zipFile, exdir = tmpDir)
-    return(normalizePath(file.path(tmpDir, base)))
-}
-
-.downloadSensorWebClientZipFile <- function(owner, repo, version, tmpDir) {
-    url <- paste('https://api.github.com/repos', RCurl::curlEscape(owner),
-                 RCurl::curlEscape(repo), 'zipball', RCurl::curlEscape(version), sep='/')
-    zipFile <- tempfile(fileext='.zip', tmpdir = tmpDir)
-    futile.logger::flog.trace("Downloading ZIP archive %s to %s", url, zipFile)
-    writeBin(RCurl::getBinaryURL(url, followLocation = TRUE,
-                                 httpHeader = c('User-Agent'='sensorweby')), con = zipFile)
-    return(zipFile);
-}
-
-.buildSensorWebClient <- function(directory, tmpDir) {
-    system(paste("mvn -q clean install -P shiny -f", file.path(directory, "pom.xml")))
-    return (Sys.glob(file.path(directory, "target", "jsClient-*-shiny.tar.gz")))
 }
