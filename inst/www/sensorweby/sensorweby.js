@@ -15,199 +15,253 @@
  */
 $(function() {
 
-  function ShinyController() {
-    this.end = null;
-    this.start = null;
-    this._bind();
-  }
-  ShinyController.prototype.on = function() {
-    return $.fn.on.apply($(this), arguments);
-  };
+  var ShinyController = (function() {
+    function ShinyController() {
+      this.end = null;
+      this.start = null;
+      this._bind();
+    }
+    ShinyController.prototype.on = function() {
+      return $.fn.on.apply($(this), arguments);
+    };
 
-  ShinyController.prototype.off = function() {
-    return $.fn.off.apply($(this), arguments);
-  };
+    ShinyController.prototype.off = function() {
+      return $.fn.off.apply($(this), arguments);
+    };
 
-  ShinyController.prototype.trigger = function() {
-    return $.fn.trigger.apply($(this), arguments);
-  };
+    ShinyController.prototype.trigger = function() {
+      return $.fn.trigger.apply($(this), arguments);
+    };
 
-  ShinyController.prototype.getTimeStart = function() {
-    return this.start;
-  };
+    ShinyController.prototype.getTimeStart = function() {
+      return this.start;
+    };
 
-  ShinyController.prototype.getTimeEnd = function() {
-    return this.end;
-  };
+    ShinyController.prototype.getTimeEnd = function() {
+      return this.end;
+    };
 
-  ShinyController.prototype.getTimeseries = function() {
-    var timeseries = [];
-    $.each(TimeSeriesController.getTimeseriesCollection(), function(id, ts) {
-      timeseries.push(ts.getApiUrl() + "timeseries/" + ts.getTsId());
-    });
-    return timeseries;
-  };
+    ShinyController.prototype.getTimeseries = function() {
+      var timeseries = [];
+      $.each(TimeSeriesController.getTimeseriesCollection(), function(id, ts) {
+        timeseries.push(ts.getApiUrl() + "timeseries/" + ts.getTsId());
+      });
+      return timeseries;
+    };
 
-  ShinyController.prototype._bind = function() {
-    EventManager.subscribe("time:end:change", $.proxy(this, "_onTimeEndChange"));
-    EventManager.subscribe("time:start:change", $.proxy(this, "_onTimeStartChange"));
-    EventManager.subscribe("timeextent:change", $.proxy(this, "_onTimeExtentChange"));
-    EventManager.subscribe("timeseries:add", $.proxy(this, "_onTimeSeriesAdd"));
-    EventManager.subscribe("timeseries:remove", $.proxy(this, "_onTimeSeriesRemove"));
-    EventManager.subscribe("timeseries:removeAll", $.proxy(this, "_onTimeSeriesRemoveAll"));
-  };
+    ShinyController.prototype._bind = function() {
+      EventManager.subscribe("time:end:change", $.proxy(this, "_onTimeEndChange"));
+      EventManager.subscribe("time:start:change", $.proxy(this, "_onTimeStartChange"));
+      EventManager.subscribe("timeextent:change", $.proxy(this, "_onTimeExtentChange"));
+      EventManager.subscribe("timeseries:add", $.proxy(this, "_onTimeSeriesAdd"));
+      EventManager.subscribe("timeseries:remove", $.proxy(this, "_onTimeSeriesRemove"));
+      EventManager.subscribe("timeseries:removeAll", $.proxy(this, "_onTimeSeriesRemoveAll"));
+    };
 
-  ShinyController.prototype._onTimeEndChange = function(e, end) {
-    /* undefined would create a moment() for the current time */
-    end = moment(end === undefined ? null : end);
-    if (!end.isValid()) {
-      if (this.end && this.end.isValid()) {
-        this.end = null;
+    ShinyController.prototype._onTimeEndChange = function(e, end) {
+      /* undefined would create a moment() for the current time */
+      end = moment(end === undefined ? null : end);
+      if (!end.isValid()) {
+        if (this.end && this.end.isValid()) {
+          this.end = null;
+          this.trigger("change:time:end");
+        }
+      } else if (!this.end ||
+                 !this.end.isValid() ||
+                 !this.end.isSame(end)) {
+        this.end = end;
         this.trigger("change:time:end");
       }
-    } else if (!this.end ||
-               !this.end.isValid() ||
-               !this.end.isSame(end)) {
-      this.end = end;
-      this.trigger("change:time:end");
-    }
-  };
+    };
 
-  ShinyController.prototype._onTimeStartChange = function(e, start) {
-    /* undefined would create a moment() for the current time */
-    start = moment(start === undefined ? null : start);
-    if (!start.isValid()) {
-      if (this.start && this.start.isValid()) {
-        this.start = null;
+    ShinyController.prototype._onTimeStartChange = function(e, start) {
+      /* undefined would create a moment() for the current time */
+      start = moment(start === undefined ? null : start);
+      if (!start.isValid()) {
+        if (this.start && this.start.isValid()) {
+          this.start = null;
+          this.trigger("change:time:start");
+        }
+      } else if (!this.start ||
+                 !this.start.isValid() ||
+                 !this.start.isSame(start)) {
+        this.start = start;
         this.trigger("change:time:start");
       }
-    } else if (!this.start ||
-               !this.start.isValid() ||
-               !this.start.isSame(start)) {
-      this.start = start;
-      this.trigger("change:time:start");
+    };
+
+    ShinyController.prototype._onTimeExtentChange = function(e, extent) {
+      this._onTimeStartChange(e, extent.from);
+      this._onTimeEndChange(e, extent.till);
+    };
+
+    ShinyController.prototype._onTimeSeriesAdd = function() {
+      this.trigger("change:timeseries");
+    };
+
+    ShinyController.prototype._onTimeSeriesRemove = function() {
+      this.trigger("change:timeseries");
+    };
+
+    ShinyController.prototype._onTimeSeriesRemoveAll = function() {
+      this.trigger("change:timeseries");
+    };
+
+    return ShinyController;
+  })();
+
+  var ReadOnlyInputBinding = (function() {
+    function ReadOnlyInputBinding() {
+      Shiny.InputBinding.call(this);
     }
-  };
 
-  ShinyController.prototype._onTimeExtentChange = function(e, extent) {
-    this._onTimeStartChange(e, extent.from);
-    this._onTimeEndChange(e, extent.till);
-  };
+    ReadOnlyInputBinding.prototype = Object.create(Shiny.InputBinding.prototype);
 
-  ShinyController.prototype._onTimeSeriesAdd = function() {
-    this.trigger("change:timeseries");
-  };
+    ReadOnlyInputBinding.prototype.getId = function(el) {
+      var $el = $(el);
+      return $el.data("input-id") || $el.data("id") || $el.attr("id");
+    };
 
-  ShinyController.prototype._onTimeSeriesRemove = function() {
-    this.trigger("change:timeseries");
-  };
+    ReadOnlyInputBinding.prototype.setValue = function(el, value) {
+      //NOT IMPLEMENTED
+    };
 
-  ShinyController.prototype._onTimeSeriesRemoveAll = function() {
-    this.trigger("change:timeseries");
-  };
+    return ReadOnlyInputBinding;
+  })();
 
-  function ReadOnlyInputBinding() {
-    Shiny.InputBinding.call(this);
-  }
+  var SWCInputBinding = (function() {
+    function SWCInputBinding(ctrl, selector, event) {
+      this.ctrl = ctrl;
+      this.selector = selector;
+      this.event = event;
+    }
 
-  ReadOnlyInputBinding.prototype = Object.create(Shiny.InputBinding.prototype);
+    SWCInputBinding.prototype = Object.create(ReadOnlyInputBinding.prototype);
 
-  ReadOnlyInputBinding.prototype.getId = function(el) {
-    var $el = $(el);
-    return $el.data("input-id") || $el.data("id") || $el.attr("id");
-  };
+    SWCInputBinding.prototype.find = function(scope) {
+      return $(scope).find(this.selector);
+    };
 
-  ReadOnlyInputBinding.prototype.setValue = function(el, value) {
-    //NOT IMPLEMENTED
-  };
+    SWCInputBinding.prototype.subscribe = function(el, callback) {
+      var i, events = $.isArray(this.event) ? this.event : [this.event];
+      for (i = 0; i < events.length; ++i) {
+        this.ctrl.on(events[i], function() {
+          /* the values are beeing set _AFTER_ the event is published,
+           * so defer the callback to later */
+          setTimeout(function() { callback(true); }, 0);
+        });
+      }
+    };
 
-  function SWCInputBinding(ctrl, selector, event) {
-    this.ctrl = ctrl;
-    this.selector = selector;
-    this.event = event;
-  }
+    SWCInputBinding.prototype.unsubscribe = function(el) {
+      var i, events = $.isArray(this.event) ? this.event : [this.event];
+      for (i = 0; i < events.length; ++i) {
+        this.ctrl.off(events[i]);
+      }
+    };
 
-  SWCInputBinding.prototype = Object.create(ReadOnlyInputBinding.prototype);
+    return SWCInputBinding;
+  })();
+  
+  var TimeInputBinding = (function() {
+    function TimeInputBinding(ctrl, selector, event) {
+      SWCInputBinding.call(this, ctrl, selector, event);
+    }
 
-  SWCInputBinding.prototype.find = function(scope) {
-    return $(scope).find(this.selector);
-  };
+    TimeInputBinding.prototype = Object.create(SWCInputBinding.prototype);
 
-  SWCInputBinding.prototype.subscribe = function(el, callback) {
-    this.ctrl.on(this.event, function() {
-      /* the values are beeing set _AFTER_ the event is published,
-       * so defer the callback to later */
-      setTimeout(function() { callback(true); }, 0);
-    });
-  };
+    TimeInputBinding.prototype.getType = function() {
+      return "n52.datetime";
+    };
 
-  SWCInputBinding.prototype.unsubscribe = function(el) {
-    this.ctrl.off(this.event);
-  };
+    TimeInputBinding.prototype.getValue = function(el) {
+      var time = this._getValueAsMoment();
+      return time && time.isValid() ? time.toDate() : null;
+    };
 
+    TimeInputBinding.prototype._getValueAsMoment = function() {
+      throw new Error("Abstract");
+    };
+    return TimeInputBinding;
+  })();
 
-  function TimeInputBinding(ctrl, selector, event) {
-    SWCInputBinding.call(this, ctrl, selector, event);
-  }
+  var TimeStartInputBinding = (function(){
+    function TimeStartInputBinding(ctrl) {
+      TimeInputBinding.call(this, ctrl, "input.jsc-time-start", "change:time:start");
+    }
+  
+    TimeStartInputBinding.prototype = Object.create(TimeInputBinding.prototype);
+  
+    TimeStartInputBinding.prototype._getValueAsMoment = function() {
+      return this.ctrl.getTimeStart();
+    };
 
-  TimeInputBinding.prototype = Object.create(SWCInputBinding.prototype);
+    return TimeStartInputBinding;
+  })();
+  
+  var TimeEndInputBinding = (function(){
+    function TimeEndInputBinding(ctrl) {
+      TimeInputBinding.call(this, ctrl, "input.jsc-time-end", "change:time:end");
+    }
 
-  TimeInputBinding.prototype.getType = function() {
-    return "n52.datetime";
-  };
+    TimeEndInputBinding.prototype = Object.create(TimeInputBinding.prototype);
 
-  TimeInputBinding.prototype.getValue = function(el) {
-    var start = this._getValueAsMoment();
-    return start && start.isValid() ? start.toDate() : null;
-  };
+    TimeEndInputBinding.prototype._getValueAsMoment = function() {
+      return this.ctrl.getTimeEnd();
+    };
 
-  TimeInputBinding.prototype._getValueAsMoment = function() {
-    throw new Error("Abstract");
-  };
+    return TimeEndInputBinding;
+  })();
+  
+  var TimeseriesInputBinding = (function() {
+    function TimeseriesInputBinding(ctrl) {
+        SWCInputBinding.call(this, ctrl, "input.jsc-timeseries", "change:timeseries");
+    }
 
-  function TimeStartInputBinding(ctrl) {
-    TimeInputBinding.call(this, ctrl, "input.jsc-time-start", "change:time:start");
-  }
+    TimeseriesInputBinding.prototype = Object.create(SWCInputBinding.prototype);
 
-  TimeStartInputBinding.prototype = Object.create(TimeInputBinding.prototype);
+    TimeseriesInputBinding.prototype.getValue = function(el) {
+      return this.ctrl.getTimeseries();
+    };
 
-  TimeStartInputBinding.prototype._getValueAsMoment = function() {
-    return this.ctrl.getTimeStart();
-  };
+    TimeseriesInputBinding.prototype.getType = function() {
+      return "n52.timeseries";
+    };
 
-  function TimeEndInputBinding(ctrl) {
-    TimeInputBinding.call(this, ctrl, "input.jsc-time-end", "change:time:end");
-  }
+    return TimeseriesInputBinding;
+  })();
 
-  TimeEndInputBinding.prototype = Object.create(TimeInputBinding.prototype);
+  var TimeIntervalInputBinding = (function() {
+    function TimeIntervalInputBinding(ctrl) {
+        SWCInputBinding.call(this, ctrl, "input.jsc-time-interval", 
+          ["change:time:start", "change:time:end"]);
+    }
+    
+    TimeIntervalInputBinding.prototype = Object.create(SWCInputBinding.prototype);
 
-  TimeEndInputBinding.prototype._getValueAsMoment = function() {
-    return this.ctrl.getTimeEnd();
-  };
+    TimeIntervalInputBinding.prototype.getType = function() {
+      return "n52.timeinterval"
+    };
 
-  function TimeseriesInputBinding(ctrl) {
-    SWCInputBinding.call(this, ctrl, "input.jsc-timeseries", "change:timeseries");
-  }
+    TimeIntervalInputBinding.prototype.getValue = function(el) {
+      var end   = this.ctrl.getTimeEnd(),
+          start = this.ctrl.getTimeStart();
+      return [
+        start && start.isValid() ? start.toDate() : null,
+          end &&   end.isValid() ?   end.toDate() : null
+      ];
+    };
 
-  TimeseriesInputBinding.prototype = Object.create(SWCInputBinding.prototype);
-
-  TimeseriesInputBinding.prototype.getValue = function(el) {
-    return this.ctrl.getTimeseries();
-  };
-
-  var controller = new ShinyController();
-
-  var timeStart = new TimeStartInputBinding(controller);
-  Shiny.inputBindings.register(timeStart, "n52.swc.timestart");
-
-  var timeEnd = new TimeEndInputBinding(controller);
-  Shiny.inputBindings.register(timeEnd, "n52.swc.timeend");
-
-  var timeSeries = new TimeseriesInputBinding(controller);
-  Shiny.inputBindings.register(timeSeries, "n52.swc.timeseries");
-
+    return TimeIntervalInputBinding;
+  })();
+  
+  var ctrl = new ShinyController();
+  Shiny.inputBindings.register(new TimeStartInputBinding(ctrl),    "n52.swc.time-start");
+  Shiny.inputBindings.register(new TimeEndInputBinding(ctrl),      "n52.swc.time-end");
+  Shiny.inputBindings.register(new TimeseriesInputBinding(ctrl),   "n52.swc.time-series");
+  Shiny.inputBindings.register(new TimeIntervalInputBinding(ctrl), "n52.swc.time-interval");
+  
   (function() {
-
     i18n.de.main.analysisView = 'Analyse';
     i18n.en.main.analysisView = 'Analysis';
 
@@ -276,7 +330,6 @@ $(function() {
     // replace I18N placeholders
     var $page = $("#analysis-page");
     $page.html(Mustache.to_html($page.html()));
-
   })();
 
 
@@ -292,4 +345,3 @@ $(function() {
     });
   });
 });
-
