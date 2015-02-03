@@ -34,12 +34,20 @@ To close the client interrupt R, usually by hitting Esc or Ctrl + C.
 
 For more information about running Shiny apps on the server see the [Shiny documentation](http://shiny.rstudio.com/).
 
+The package ships with example applications:
+
+```r
+runExample("basic")
+runExample("distance-matrix")
+runExample("pollutionPlot")
+runExample("timePlot")
+```
+
 ## Configuration
 
 You can configure the application by passing a configuration file in YAML format to the function `run(..)`. The default configuration files is at `js-swc/settings.yml`.
 
 ### Interface Builder Functions
-
 
 #### Begin Time Input
 
@@ -174,11 +182,38 @@ swcPage(
 
 ## Developer Documentation
 
-### Updating the JS SensorWebClient
+### Change and test code
 
-To install the latest tag just run:
 
 ```r
+require(devtools)
+
+# do your developments...
+
+# install the package or build & reload in RStudio
+devtools::install() # when workdir is directory /sensorweby
+
+# load the package
+require(sensorweby)
+
+# test...
+
+```
+
+### Updating the JavaScript Sensor Web Client
+
+To install the latest tag of the 52°North JavaScript Sensor Web Client just run:
+
+```r
+#require("devtools")
+#devtools::install_github('cscheid/rgithub')
+#require("github")
+
+# http://stackoverflow.com/questions/15347233/ssl-certificate-failed-for-twitter-in-r
+# Set SSL certs globally
+#options(RCurlOptions = list(cainfo = system.file("CurlSSL", "cacert.pem", package = "RCurl")))
+
+require("sensorweby")
 installSensorWebClient()
 ```
 
