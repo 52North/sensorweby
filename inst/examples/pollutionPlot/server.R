@@ -80,10 +80,16 @@ shinyServer(function(input, output, session) {
     sta.near <- reactive({
         
         ts <- ts.pollutant()
-        if (!is.null(ts))
-            findNearestStation(station(ts))
-        else 
+        if (!is.null(ts)) {
+            sta <- station(ts)
+            if (id(sta) %in% id(sta.all)) {
+                findNearestStation(sta)
+            } else {
+                NULL
+            }
+        } else {
             NULL
+        }
     })
     
     ts.ws <- reactive({
