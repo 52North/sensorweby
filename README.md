@@ -49,7 +49,7 @@ sensorweby::runExample("basic")
 
 #### Distance Matrix
 
-Create a pollution plot using the nearest available station with suitable data:
+Create a pollution plot using the nearest available station with suitable data.
 
 ```r
 sensorweby::runExample("distance-matrix")
@@ -58,7 +58,7 @@ sensorweby::runExample("distance-matrix")
 
 #### Pollution Plot
 
-Example for a wind rose pollution plot powered by `openair`.
+Example for a wind rose pollution plot powered by `openair`. Select an station which provides wind data on the map, then switch to the analysis page to see a [wind rose/pollution rose](http://www.openair-project.org/Examples/WindPollutionRoses.aspx).
 
 
 ```r
@@ -68,7 +68,7 @@ sensorweby::runExample("pollutionPlot")
 
 #### Advanced Timeseries Plot
 
-Plot the currently select time series with an advanced plotting function from the package `openair` (`openair::timePlot`).
+Plot the currently select time series with an advanced plotting function from the package `openair` (`openair::timePlot`). Select any phenomenon and time series from the map and specify the time span of interest. Then click on the "Analysis" button to see the same data plotted by `R`.
 
 
 ```r
