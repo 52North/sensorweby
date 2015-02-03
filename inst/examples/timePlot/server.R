@@ -20,18 +20,19 @@ library(futile.logger)
 
 shinyServer(func = function(input, output, session) {
     output$timePlot <- renderPlot({
-        flog.info("Requesting data for %s timeseries for %s", length(input$series), input$time)
-        data <- getData(input$series, timespan = input$time)
-        times <- unique(sort(do.call(c, lapply(data, time))))
-        values <- lapply(data, function(x) value(x)[match(times, time(x))])
-        names(values) <- id(input$series)
-        values$date <- times
-        df <- as.data.frame(values)
-        if (dim(df)[1] > 0) {
-            openair::timePlot(df, pollutant = id(input$series), 
-                              name.pol = label(input$series),
-                              plot.type = "h", smooth = TRUE, 
-                              ci = TRUE, ylab=c())
+        if (length(input$series)>0) {
+            data <- getData(input$series, timespan = input$time)
+            times <- unique(sort(do.call(c, lapply(data, time))))
+            values <- lapply(data, function(x) value(x)[match(times, time(x))])
+            names(values) <- id(input$series)
+            values$date <- times
+            df <- as.data.frame(values)
+            if (dim(df)[1] > 0) {
+                openair::timePlot(df, pollutant = id(input$series), 
+                                  name.pol = label(input$series),
+                                  plot.type = "h", smooth = TRUE, 
+                                  ci = TRUE, ylab=c())
+            }    
         }
     })
 })
