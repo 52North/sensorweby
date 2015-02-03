@@ -6,9 +6,10 @@ A JavaScript sensor web client with graphs and analytics powered by Shiny. `sens
 
 ## Installation
 
-The sensorweby package is not on CRAN yet, so please download and install the package manually. The first option is using the package ``devtools``, which also works well for your own fork or development versions by other contributors.
+The sensorweby packageand the required package `sensorweb4R` are not on CRAN yet, so please download and install the package manually. The first option is using the package ``devtools``, which also works well for your own fork or development versions by other contributors.
 
 ```r
+devtools::install_github("52North/sensorweb4R")
 devtools::install_github("52North/sensorweby")
 ```
 
