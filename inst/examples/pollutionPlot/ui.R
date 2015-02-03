@@ -12,15 +12,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+library(shiny)
+library(sensorweby)
 
-.onLoad <- function(libname, pkgname) {
-    shiny::registerInputHandler("n52.datetime", .timeInputHandler);
-    shiny::registerInputHandler("n52.timeseries", .timeseriesInputHandler)
-    shiny::registerInputHandler("n52.timeinterval", .timeIntervalInputHandler)
-}
-
-.onUnload <- function(libpath) {
-    shiny::removeInputHandler("n52.datetime")
-    shiny::removeInputHandler("n52.timeseries")
-    shiny::removeInputHandler("n52.timeinterval")
-}
+shinyUI(  
+    swcPage( 
+        debug = TRUE,
+        title = "Shiny Sensor Web Client",
+        author = "Christian Autermann",
+        description = "Javascript Sensor Web Client Example for Shiny",
+        swcIntervalInput("time"),
+        swcTimeseriesInput("series"),
+        swcFullPanel(plotOutput("pollutionPlot", width="100%", height="100%"))
+    )
+);
