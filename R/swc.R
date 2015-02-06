@@ -95,8 +95,10 @@ swcIntervalInput <- function(id) {
 #'  swcI18N('eng', 'button_label', 'OK')
 #' }
 swcI18N <- function(lang, key, value) {
-  tags$script(type="text/javascript", sprintf("i18n.%s.%s = '%s'", lang, key, value))
+  tags$script(type="text/javascript", paste0("i18n.", lang,".", key, " = '", value, "'", collapse = ";"))
 }
+
+
 
 #' Left Panel Definition
 #'
@@ -201,7 +203,8 @@ swcPage <- function(...,
                     title=NULL,
                     author=NULL,
                     description=NULL,
-                    debug=FALSE) {
+                    debug=FALSE,
+                    caption=c(de = "Analyse", en = "Analysis")) {
 
 
     addResourcePath("sensorweby", system.file("www/sensorweby", package="sensorweby"))
@@ -228,6 +231,7 @@ swcPage <- function(...,
         tags$script(src="sensorweby/isTouchOrIsMobile.js"),
         tags$script(src=sprintf("js/jsc-0.2.0.deps%s", ext)),
         tags$script(src=sprintf("js/jsc-0.2.0%s", ext)),
+        swcI18N(names(caption), "main.analysisView", caption),
         tags$script(src="sensorweby/sensorweby.js")
     )
 

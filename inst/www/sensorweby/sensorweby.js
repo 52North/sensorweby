@@ -162,7 +162,7 @@ $(function() {
 
     return SWCInputBinding;
   })();
-  
+
   var TimeInputBinding = (function() {
     function TimeInputBinding(ctrl, selector, event) {
       SWCInputBinding.call(this, ctrl, selector, event);
@@ -189,16 +189,16 @@ $(function() {
     function TimeStartInputBinding(ctrl) {
       TimeInputBinding.call(this, ctrl, "input.jsc-time-start", "change:time:start");
     }
-  
+
     TimeStartInputBinding.prototype = Object.create(TimeInputBinding.prototype);
-  
+
     TimeStartInputBinding.prototype._getValueAsMoment = function() {
       return this.ctrl.getTimeStart();
     };
 
     return TimeStartInputBinding;
   })();
-  
+
   var TimeEndInputBinding = (function(){
     function TimeEndInputBinding(ctrl) {
       TimeInputBinding.call(this, ctrl, "input.jsc-time-end", "change:time:end");
@@ -212,7 +212,7 @@ $(function() {
 
     return TimeEndInputBinding;
   })();
-  
+
   var TimeseriesInputBinding = (function() {
     function TimeseriesInputBinding(ctrl) {
         SWCInputBinding.call(this, ctrl, "input.jsc-timeseries", "change:timeseries");
@@ -233,10 +233,10 @@ $(function() {
 
   var TimeIntervalInputBinding = (function() {
     function TimeIntervalInputBinding(ctrl) {
-        SWCInputBinding.call(this, ctrl, "input.jsc-time-interval", 
+        SWCInputBinding.call(this, ctrl, "input.jsc-time-interval",
           ["change:time:start", "change:time:end"]);
     }
-    
+
     TimeIntervalInputBinding.prototype = Object.create(SWCInputBinding.prototype);
 
     TimeIntervalInputBinding.prototype.getType = function() {
@@ -254,17 +254,14 @@ $(function() {
 
     return TimeIntervalInputBinding;
   })();
-  
+
   var ctrl = new ShinyController();
   Shiny.inputBindings.register(new TimeStartInputBinding(ctrl),    "n52.swc.time-start");
   Shiny.inputBindings.register(new TimeEndInputBinding(ctrl),      "n52.swc.time-end");
   Shiny.inputBindings.register(new TimeseriesInputBinding(ctrl),   "n52.swc.time-series");
   Shiny.inputBindings.register(new TimeIntervalInputBinding(ctrl), "n52.swc.time-interval");
-  
-  (function() {
-    i18n.de.main.analysisView = 'Analyse';
-    i18n.en.main.analysisView = 'Analysis';
 
+  (function() {
     Pages.navigateToStatistics = function() {
       Pages.navigateToPage("#analysis-page");
       location.href = "#analysis";
