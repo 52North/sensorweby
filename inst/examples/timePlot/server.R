@@ -21,7 +21,7 @@ library(futile.logger)
 shinyServer(function(input, output, session) {
     output$plot <- renderPlot({
         validate(
-            need(length(input$series > 0), 'No Timeseries selected'),
+            need(length(input$series) > 0, 'No Timeseries selected'),
             need(input$time, "No timespan selected")
         )
         data <- getData(input$series, timespan = input$time)
