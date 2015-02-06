@@ -18,21 +18,18 @@ library(openair)
 library(lubridate)
 library(futile.logger)
 
-flog.threshold(futile.logger::DEBUG, name = "sensorweb4R")
-flog.threshold(futile.logger::DEBUG)
-
 endpoint <- example.endpoints()[2]
-flog.debug("Searching for wind phenomenons")
+flog.info("Searching for wind phenomenons")
 phe.all <- phenomena(endpoint)
 phe.ws <- phe.all[names(phe.all) == "61110 - WSP-SCA"]
 phe.wd <- phe.all[names(phe.all) == "61102 - DD"]
 
-flog.debug("Searching for stations with wind data")
+flog.info("Searching for stations with wind data")
 sta.ws <- stations(endpoint, phenomenon = phe.ws)
 sta.wd <- stations(endpoint, phenomenon = phe.wd)
 sta.wind <- sta.ws[match(id(sta.ws), id(sta.wd))]
 
-flog.debug("Building distance matrix")
+flog.info("Building distance matrix")
 sta.all <- stations(endpoint)
 dm <- distanceMatrix(sta.all)
 
@@ -60,70 +57,45 @@ requestData <- function(ts.ws, ts.wd, ts.pollutant, timespan) {
     data
 }
 
-#time <- strptime(c("2015-01-29T23:00:00Z","2015-01-30T22:59:59Z"), "%Y-%m-%dT%H:%M:%OS", tz = "UTC")
-#input <- list(series=fetch(Timeseries(id="ts_619363f8d5a45c3c3b5c333ea898937d", endpoint=endpoint)),
+#time <- strptime(c("2015-01-27T23:00:00Z","2015-02-01T22:59:59Z"), "%Y-%m-%dT%H:%M:%OS", tz = "UTC")
+#input <- list(series=fetch(Timeseries(id="ts_6b4312a023c204544035387722ca8794", endpoint=endpoint)),
 #              time=lubridate::new_interval(time[1], time[2]))
 
 shinyServer(function(input, output, session) {
     flog.threshold(futile.logger::DEBUG)
     
     ts.pollutant <- reactive({
-        if (length(input$series) > 0) {
-            ts <- input$series[1]
-        } else {
-            ts <- NULL
-        }
+        validate(need(length(input$series) > 0, "No timeseries selected."))
+        ts <- input$series[1]
         flog.debug("Pollutant: %s", ts)
         ts
     })
     
     sta.near <- reactive({
-        
-        ts <- ts.pollutant()
-        if (!is.null(ts)) {
-            sta <- station(ts)
-            if (id(sta) %in% id(sta.all)) {
-                findNearestStation(sta)
-            } else {
-                NULL
-            }
-        } else {
-            NULL
-        }
+        ts.pollutant <- ts.pollutant()
+        sta <- station(ts.pollutant)
+        validate(need(id(sta) %in% id(sta.all), "Unknown station"))
+        findNearestStation(sta)
     })
     
     ts.ws <- reactive({
         sta.near <- sta.near()
-        if (is.null(sta.near)) {
-            NULL
-        } else {
-            ts <- timeseries(sta.near, phenomenon = phe.ws)
-            # currently needed due to limited filtering
-            # support in the old timeseries api
-            ts <- ts[station(ts) == sta.near]
-            flog.debug("Wind speed timeseries: %s", ts)
-            ts
-        }
+        ts <- timeseries(sta.near, phenomenon = phe.ws)
+        # currently needed due to limited filtering
+        # support in the old timeseries api
+        ts[station(ts) == sta.near]
     })
     
     ts.wd <- reactive({
         sta.near <- sta.near()
-        if (is.null(sta.near)) {
-            NULL
-        } else {
-            ts <- timeseries(sta.near, phenomenon = phe.wd)
-            # currently needed due to limited filtering
-            # support in the old timeseries api
-            ts <- ts[station(ts) == sta.near]
-            flog.debug("Wind direction timeseries: %s", ts)
-            ts
-        }
+        ts <- timeseries(sta.near, phenomenon = phe.wd)
+        # currently needed due to limited filtering
+        # support in the old timeseries api
+        ts[station(ts) == sta.near]
     })
 
     time <- reactive({
-        t <- input$time
-        flog.debug("Timespan: %s", t)
-        t
+        input$time
     })
     
     data <- reactive({
@@ -131,32 +103,26 @@ shinyServer(function(input, output, session) {
         ts.ws <-ts.ws()
         ts.wd <- ts.wd()
         ts.pollutant <- ts.pollutant()
-        if (is.null(time) ||
-                is.null(ts.ws) || 
-                is.null(ts.wd) || 
-                is.null(ts.pollutant)) {
-            NULL
-        } else {
-            flog.debug("Requesting data for %s", time)
-            data <- requestData(ts.ws, ts.wd, ts.pollutant, time)
-            if (!all(is.na(data$ws)) && !all(is.na(data$wd))) {
-                data
-            } else {
-                flog.info("No wind data for %s", time)
-                NULL
-            } 
-        }
-        
+        flog.info("Requesting data for %s", time)
+        data <- requestData(ts.ws, ts.wd, ts.pollutant, time)
+        data.nona <- na.omit(data)
+        validate(
+            need(length(na.omit(data$ws)) > 0, "No wind speed data for timespan."),
+            need(length(na.omit(data$wd)) > 0, "No wind direction data for timespan."),
+            need(length(na.omit(data[id(ts.pollutant)])) > 0, "No pollution data for timespan."))
+        validate(need(dim(data.nona)[1] > 2, "Not enough data."))
+        data.nona
     })
     
     output$pollutionPlot <- renderPlot({
         data <- data()
         ts.pollutant <- ts.pollutant()
-        if (is.null(data) || is.null(ts.pollutant)) {
-            NULL
-        } else {
-            pollutionRose(data, pollutant = id(ts.pollutant))   
-        }
         
+        validate(need(length(unique(data[id(ts.pollutant)])) > 1,
+                      paste("Due to a strange bug in openair we can not plot",
+                            "this series as is contains only a single value for",
+                            "every timestamp")))
+
+        pollutionRose(data, pollutant = id(ts.pollutant))
     })
 })
