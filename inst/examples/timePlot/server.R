@@ -18,21 +18,22 @@ library(sensorweb4R)
 library(lubridate)
 library(futile.logger)
 
-shinyServer(func = function(input, output, session) {
-    output$timePlot <- renderPlot({
-        if (length(input$series)>0) {
-            data <- getData(input$series, timespan = input$time)
-            times <- unique(sort(do.call(c, lapply(data, time))))
-            values <- lapply(data, function(x) value(x)[match(times, time(x))])
-            names(values) <- id(input$series)
-            values$date <- times
-            df <- as.data.frame(values)
-            if (dim(df)[1] > 0) {
-                openair::timePlot(df, pollutant = id(input$series), 
-                                  name.pol = label(input$series),
-                                  plot.type = "h", smooth = TRUE, 
-                                  ci = TRUE, ylab=c())
-            }    
-        }
+shinyServer(function(input, output, session) {
+    output$plot <- renderPlot({
+        validate(
+            need(length(input$series > 0), 'No Timeseries selected'),
+            need(input$time, "No timespan selected")
+        )
+        data <- getData(input$series, timespan = input$time)
+        times <- unique(sort(do.call(c, lapply(data, time))))
+        values <- lapply(data, function(x) value(x)[match(times, time(x))])
+        names(values) <- id(input$series)
+        values$date <- times
+        df <- as.data.frame(values)
+        validate(need(dim(df)[1] > 0, "No data available"))
+        timePlot(df, pollutant = id(input$series), 
+                 name.pol = label(input$series),
+                 plot.type = "h", smooth = TRUE, 
+                 ci = TRUE, ylab=c())
     })
 })
