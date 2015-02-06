@@ -329,8 +329,8 @@ $(function() {
     $page.html(Mustache.to_html($page.html()));
   })();
 
-
-  $.getJSON("settings.json", function(json) {
+  $.getJSON("settings.json").always(function(json, status) {
+    if (status !== "success") json = {};
     StartController.init(json);
     $(document).ready(function(){
       $('[data-target="#analysis"]').click(function(){
