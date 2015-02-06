@@ -39,6 +39,7 @@ You can configure the application by passing a configuration file in YAML format
 
 ### Interface Builder Functions
 
+### Input Functions
 
 #### Begin Time Input
 
@@ -72,9 +73,25 @@ swcTimeEndInput('end')
 
 ```
 
+#### Time Interval Input
+
+`swcIntervalInput` adds a new reactive input that contains the currently
+selected timespan (as a `lubridate::interval`) of the JavaScript SensorWebClient. Returns a HTML `input` tag.
+
+| Parameter | Description         |
+|-----------|---------------------|
+| `id `     | the id of the input |
+
+##### Example
+
+```r
+swcIntervalInput('time')
+
+```
+
 #### Timeseries Input
 
-`swcTimeseriesInput` adds a new reactive input that contains a list identifiers of the currently selected time series of the JavaScript SensorWebClient. Returns a HTML `input` tag.
+`swcTimeseriesInput` adds a new reactive input that contains the currently selected time series of the JavaScript SensorWebClient (as a `sensorweb4R::Timeseries`. Returns a HTML `input` tag.
 
 | Parameter | Description         |
 |-----------|---------------------|
@@ -86,6 +103,9 @@ swcTimeEndInput('end')
 swcTimeseriesInput('series')
 
 ```
+
+### Interface Builder Functions
+
 
 #### I18N Definition
 
@@ -117,7 +137,7 @@ swcI18N('eng', 'button_label', 'OK')
 
 ```r
 swcLeftPanel(
-	plotOutput("output", width="100%", height="100%")
+    plotOutput("output", width="100%", height="100%")
 )
 
 ```
@@ -135,16 +155,34 @@ swcLeftPanel(
 
 ```r
 swcRightPanel(
-	header="Parameters",
-	selectInput(
- 		"pollutant",
- 		label="Pollutant",
-		choices = c("NOX", "NO2", "O3", "PM10", "SO2", "CO", "PM25"),
- 		selected = "NOX"
-	),
-	swcTimeBeginInput("begin"),
-	swcTimeEndInput("end"),
-	swcTimeseriesInput("series"),
+    header="Parameters",
+    selectInput(
+        "pollutant",
+        label="Pollutant",
+        choices = c("NOX", "NO2", "O3", "PM10", "SO2", "CO", "PM25"),
+        selected = "NOX"
+    ),
+    swcTimeBeginInput("begin"),
+    swcTimeEndInput("end"),
+    swcTimeseriesInput("series")
+)
+
+```
+
+
+#### Full Panel Definition
+
+`swcFullPanel` creates a panel spanning the complete analysis view of the JavaScript SensorWebClient. Returns a HTML `div` tag for the panel.
+
+| Parameter   | Description                                         |
+|-------------|-----------------------------------------------------|
+| `...`       | inherited from `shiny::tags$div`                    |
+
+##### Example
+
+```r
+swcFullPanel(
+    plotOutput("output", width="100%", height="100%")
 )
 
 ```
@@ -165,8 +203,8 @@ swcRightPanel(
 
 ```r
 swcPage(
-	swcLeftPanel(...),
-	swcRightPanel(...)
+    swcLeftPanel(...),
+    swcRightPanel(...)
 )
 
 ```
