@@ -24,8 +24,9 @@ shinyUI(
         description = "Javascript Sensor Web Client Example for Shiny",
         swcIntervalInput("time"),
         swcTimeseriesInput("series"),
-        swcFullPanel(plotOutput("pollutionPlot",
-                                width="100%",
-                                height="100%"))
+        swcLeftPanel(plotOutput("pollutionPlot", width="100%", height="100%")),
+        swcRightPanel(header = "Parameters",
+                      uiOutput("timeseriesSelection"),
+                      textOutput("note", inline = TRUE))
     )
 );

@@ -57,18 +57,27 @@ requestData <- function(ts.ws, ts.wd, ts.pollutant, timespan) {
     data
 }
 
-#time <- strptime(c("2015-01-27T23:00:00Z","2015-02-01T22:59:59Z"), "%Y-%m-%dT%H:%M:%OS", tz = "UTC")
+#time <- strptime(c("2015-01-17T23:00:00Z","2015-02-26T22:59:59Z"), "%Y-%m-%dT%H:%M:%OS", tz = "UTC")
 #input <- list(series=fetch(Timeseries(id="ts_6b4312a023c204544035387722ca8794", endpoint=endpoint)),
 #              time=lubridate::new_interval(time[1], time[2]))
 
 shinyServer(function(input, output, session) {
-    flog.threshold(futile.logger::DEBUG)
     
-    ts.pollutant <- reactive({
+    output$timeseriesSelection <- renderUI({
         validate(need(length(input$series) > 0, "No timeseries selected."))
-        ts <- input$series[1]
-        flog.debug("Pollutant: %s", ts)
-        ts
+
+        choices <- resourceURL(input$series)
+        names(choices) <- label(input$series)
+
+        selectInput("selectedTimeseries",
+                    label = "Timeseries",
+                    choices = choices)
+    })
+
+    ts.pollutant <- reactive({
+        selected <- input$selectedTimeseries
+        validate(need(selected, "No timeseries selected."))
+        fetch(fromURI(selected)$timeseries[1])
     })
     
     sta.near <- reactive({
@@ -77,24 +86,25 @@ shinyServer(function(input, output, session) {
         validate(need(id(sta) %in% id(sta.all), "Unknown station"))
         findNearestStation(sta)
     })
-    
+
     ts.ws <- reactive({
-        sta.near <- sta.near()
-        ts <- timeseries(sta.near, phenomenon = phe.ws)
         # currently needed due to limited filtering
         # support in the old timeseries api
+        sta.near <- sta.near()
+        ts <- timeseries(sta.near, phenomenon = phe.ws)
         ts[station(ts) == sta.near]
     })
     
     ts.wd <- reactive({
-        sta.near <- sta.near()
-        ts <- timeseries(sta.near, phenomenon = phe.wd)
         # currently needed due to limited filtering
         # support in the old timeseries api
+        sta.near <- sta.near()
+        ts <- timeseries(sta.near, phenomenon = phe.wd)
         ts[station(ts) == sta.near]
     })
 
     time <- reactive({
+        validate(need(time, "No timespan selected"))
         input$time
     })
     
@@ -113,12 +123,21 @@ shinyServer(function(input, output, session) {
         validate(need(dim(data.nona)[1] > 2, "Not enough data."))
         data.nona
     })
+
+    output$note <- reactive({
+        sta.near <- tryCatch(sta.near(), error = function(x)"")
+        if (is.character(sta.near)) return(sta.near)
+        ts.pollutant <- ts.pollutant()
+        if (sta.near != station(ts.pollutant)) {
+            paste0("Wind data is taken from the nearest station ", label(sta.near), ".")
+        }
+    })
     
     output$pollutionPlot <- renderPlot({
         data <- data()
         ts.pollutant <- ts.pollutant()
         
-        validate(need(length(unique(data[id(ts.pollutant)])) > 1,
+        validate(need(dim(unique(data[id(ts.pollutant)])[1]) > 1,
                       paste("Due to a strange bug in openair we can not plot",
                             "this series as is contains only a single value for",
                             "every timestamp")))
