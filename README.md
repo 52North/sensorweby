@@ -35,9 +35,7 @@ For more information about running Shiny apps on the server see the [Shiny docum
 
 ## Configuration
 
-You can configure the application by passing a configuration file in YAML format to the function `run(..)`. The default configuration files is at `js-swc/settings.yml`.
-
-### Interface Builder Functions
+The JavaScript client can be configured by placing a `www/settings.json` file inside the app directory. For configuration options refer to the documentation of the [client](https://github.com/52North/js-sensorweb-client/).
 
 ### Input Functions
 
