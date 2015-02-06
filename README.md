@@ -22,11 +22,67 @@ R CMD INSTALL sensorweby
 
 ## Running 
 
-The `sensorweby` package only has one function to start the interactive web client:
+A `sensorweby` app is very similar to a standard `shiny` app. So refer to their [extensive documentation](http://shiny.rstudio.com/). This package adds new UI builder functions to generate the JavaScript SensorWebClient UI and a analysis page therein (see `?swcPage`, `?swcLeftPanel`, `?swcRightPanel` and `?swcFullPanel`).
+
+It also adds new inputs to obtain the session state, namely the currently selected time interval and timeseries of the JavaScript client (see `?swcTimeseriesInput`, `?swcIntervalInput`, `?swcTimeBeginInput` and `?swcTimeEndInput`).
+
+Using these functions you easily can enhance the JavaScript client using the analytical power of R.
+
+### Example
+
+This `ui.R` creates the complete client and adds a *Analytics* page. This page contains a single `plotOutput` and two `sensorweby` inputs:
+
+```r
+library(shiny)
+library(sensorweby)
+
+shinyUI(
+    swcPage(
+        caption = c(en = "Time Plot"),
+        title = "Sensorweby",
+        swcIntervalInput("time"),
+        swcTimeseriesInput("series"),
+        swcFullPanel(plotOutput("plot", width="100%", height="100%"))
+    )
+)
+```
+
+The accompanying  `server.R` takes the two `reactive` inputs and creates the plot output using `sensorweb4R` to request and `openair` to plot the data:
 
 ```r
 library(sensorweby)
-run()
+library(sensorweb4R)
+library(openair)
+library(lubridate)
+
+shinyServer(function(input, output, session) {
+    output$plot <- renderPlot({
+
+        validate(
+            need(length(input$series) > 0, 'No Timeseries selected'),
+            need(input$time, "No timespan selected")
+        )
+        data <- getData(input$series, timespan = input$time)
+        times <- unique(sort(do.call(c, lapply(data, time))))
+        values <- lapply(data, function(x) value(x)[match(times, time(x))])
+        names(values) <- id(input$series)
+        values$date <- times
+        df <- as.data.frame(values)
+
+        validate(need(dim(df)[1] > 0, "No data available"))
+
+        timePlot(df, pollutant = id(input$series),
+                 name.pol = label(input$series),
+                 plot.type = "h", smooth = TRUE,
+                 ci = TRUE, ylab=c())
+    })
+})
+```
+
+You also can run [various examples](https://github.com/52North/sensorweby/tree/master/inst/examples) using the `runExample` function. For the above simply run
+
+```r
+sensorweby::runExample("timePlot")
 ```
 
 To close the client interrupt R, usually by hitting Esc or Ctrl + C.
