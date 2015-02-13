@@ -32,7 +32,7 @@ sta.wind <- sta.ws[match(id(sta.ws), id(sta.wd))]
 flog.info("Building distance matrix")
 sta.all <- stations(endpoint)
 dm <- distanceMatrix(sta.all)
-
+flog.info("Done")
 rm(phe.all, sta.wd, sta.ws)
 
 findNearestStation <- function(x) {
@@ -45,7 +45,8 @@ findNearestStation <- function(x) {
     nearest(x, sta.all, dm, filter.fun = filter, n = 1)
 }
 
-requestData <- function(ts.ws, ts.wd, ts.pollutant, timespan) { 
+requestData <- function(ts.ws, ts.wd, ts.pollutant, timespan) {
+    flog.info("Requesting data for %s", timespan)
     ts <- rbind2(rbind2(ts.ws, ts.wd), ts.pollutant)
     data <- getData(ts, timespan = timespan)
     times <- unique(sort(do.call(c, lapply(data, time))))
@@ -63,31 +64,35 @@ requestData <- function(ts.ws, ts.wd, ts.pollutant, timespan) {
 
 shinyServer(function(input, output, session) {
     
-    output$timeseriesSelection <- renderUI({
-        validate(need(length(input$series) > 0, "No timeseries selected."))
-
-        choices <- resourceURL(input$series)
-        names(choices) <- label(input$series)
-
+    output$selector <- renderUI({
+        flog.info("Creating selector")
+        series <- input$series
+        validate(need(length(series) > 0, "No timeseries selected."))
+        choices <- resourceURL(series)
+        names(choices) <- label(series)
         selectInput("selectedTimeseries",
                     label = "Timeseries",
                     choices = choices)
     })
-
+    
     ts.pollutant <- reactive({
+        flog.info("Creating ts.pollutant")
         selected <- input$selectedTimeseries
         validate(need(selected, "No timeseries selected."))
-        fetch(fromURI(selected)$timeseries[1])
+        series <- fromURI(selected)$timeseries
+        fetch(series)
     })
     
     sta.near <- reactive({
+        flog.info("Creating sta.near")
         ts.pollutant <- ts.pollutant()
         sta <- station(ts.pollutant)
         validate(need(id(sta) %in% id(sta.all), "Unknown station"))
         findNearestStation(sta)
     })
-
+    
     ts.ws <- reactive({
+        flog.info("Creating ts.ws")
         # currently needed due to limited filtering
         # support in the old timeseries api
         sta.near <- sta.near()
@@ -96,52 +101,78 @@ shinyServer(function(input, output, session) {
     })
     
     ts.wd <- reactive({
+        flog.info("Creating ts.wd")
         # currently needed due to limited filtering
         # support in the old timeseries api
         sta.near <- sta.near()
         ts <- timeseries(sta.near, phenomenon = phe.wd)
         ts[station(ts) == sta.near]
     })
-
-    time <- reactive({
+    
+    timespan <- reactive({
+        flog.info("Creating time")
         validate(need(time, "No timespan selected"))
         input$time
     })
     
-    data <- reactive({
-        time <- time()
+    data.rose <- reactive({
+        flog.info("Creating data.rose")
+        timespan <- timespan()
         ts.ws <-ts.ws()
         ts.wd <- ts.wd()
         ts.pollutant <- ts.pollutant()
-        flog.info("Requesting data for %s", time)
-        data <- requestData(ts.ws, ts.wd, ts.pollutant, time)
+        data <- requestData(ts.ws, ts.wd, ts.pollutant, timespan)
+        validate(need(length(na.omit(data$ws)) > 0, "No wind speed data for timespan."),
+                 need(length(na.omit(data$wd)) > 0, "No wind direction data for timespan."),
+                 need(length(na.omit(data[id(ts.pollutant)])) > 0, "No pollution data for timespan."))
         data.nona <- na.omit(data)
-        validate(
-            need(length(na.omit(data$ws)) > 0, "No wind speed data for timespan."),
-            need(length(na.omit(data$wd)) > 0, "No wind direction data for timespan."),
-            need(length(na.omit(data[id(ts.pollutant)])) > 0, "No pollution data for timespan."))
         validate(need(dim(data.nona)[1] > 2, "Not enough data."))
         data.nona
     })
-
-    output$note <- reactive({
-        sta.near <- tryCatch(sta.near(), error = function(x)"")
-        if (is.character(sta.near)) return(sta.near)
-        ts.pollutant <- ts.pollutant()
-        if (sta.near != station(ts.pollutant)) {
-            paste0("Wind data is taken from the nearest station ", label(sta.near), ".")
-        }
+    
+    data.time <- reactive({
+        flog.info("Creating data.time")
+        series <- input$series
+        validate(need(length(series) > 0, 'No Timeseries selected'))
+        timespan <- timespan()
+        data <- getData(series, timespan = timespan)
+        times <- unique(sort(do.call(c, lapply(data, time))))
+        values <- lapply(data, function(x) value(x)[match(times, time(x))])
+        names(values) <- id(series)
+        values$date <- times
+        values <- as.data.frame(values)
+        validate(need(dim(values)[1] > 0, "No data available"))
+        values
     })
     
-    output$pollutionPlot <- renderPlot({
-        data <- data()
-        ts.pollutant <- ts.pollutant()
+    output$note <- reactive({
+        flog.info("Creating note")
+        sta <- tryCatch(sta.near(), error = function(x) NULL)
+        ts <- tryCatch(ts.pollutant(), error = function(x) NULL)
+        if (is.null(sta) || is.null(ts)) return("")
+        paste0("Wind data is taken from the nearest station ", label(sta), ".")
+    })
+    
+    output$timePlot <- renderPlot({
+        flog.info("Creating timePlot")
+        data <- data.time()
+        series <- input$series
+        timePlot(data, pollutant = id(series), 
+                 name.pol = label(series),
+                 plot.type = "h", smooth = TRUE, 
+                 ci = TRUE, ylab=c())
+    })
+    
+    output$rosePlot <- renderPlot({
+        flog.info("Creating rosePlot")
+        data <- data.rose()
+        ts <- ts.pollutant()
         
-        validate(need(dim(unique(data[id(ts.pollutant)])[1]) > 1,
+        validate(need(dim(unique(data[id(ts)])[1]) > 1,
                       paste("Due to a strange bug in openair we can not plot",
                             "this series as is contains only a single value for",
                             "every timestamp")))
-
-        pollutionRose(data, pollutant = id(ts.pollutant))
+        
+        pollutionRose(data, pollutant = id(ts))
     })
 })

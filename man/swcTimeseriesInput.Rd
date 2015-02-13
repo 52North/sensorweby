@@ -13,9 +13,9 @@ swcTimeseriesInput(id)
 a HTML \code{input} tag
 }
 \description{
-\code{swcTimeseriesInput} adds a new reactive input that contains a
-list identifiers of the currently selected time series of the JavaScript
-SensorWebClient.
+`swcTimeseriesInput` adds a new reactive input that contains the currently
+selected time series of the JavaScript SensorWebClient (as a
+`sensorweb4R::Timeseries`. Returns a HTML `input` tag.
 }
 \examples{
 \dontrun{

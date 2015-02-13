@@ -17,10 +17,9 @@ library(sensorweby)
 
 shinyUI(  
     swcPage( 
-        debug=TRUE,
-        title="Shiny Sensor Web Client",
-        author="Christian Autermann",
-        description="Javascript Sensor Web Client Example for Shiny",
+        title="Sensorweby Timeplot",
+        caption = c(en = "Timeplot",
+                    de = "Timeplot"),
         swcIntervalInput("time"),
         swcTimeseriesInput("series"),
         swcFullPanel(plotOutput("timePlot", width="100%", height="100%"))
