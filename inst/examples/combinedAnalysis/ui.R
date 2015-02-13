@@ -15,28 +15,29 @@
 library(shiny)
 library(sensorweby)
 
+
+conditionalTag <- function(tag, condition) {
+    tagAppendAttributes(tag, `data-display-if` = condition)
+}
 shinyUI(  
     swcPage( 
         title = "Sensorweby",
         swcIntervalInput("time"),
         swcTimeseriesInput("series"),
         swcLeftPanel(
-            conditionalPanel(condition = "input.analysis == 'time'", 
-                             plotOutput(outputId = "timePlot",
-                                        height = "100%")),
-            conditionalPanel(condition = "input.analysis == 'rose'", 
-                             plotOutput(outputId = "rosePlot",
-                                        height = "100%"))
+            conditionalTag(plotOutput(outputId = "timePlot", height = "100%"), "input.analysis == 'time'"),
+            conditionalTag(plotOutput(outputId = "rosePlot", height = "100%"), "input.analysis == 'rose'")
         ),
         swcRightPanel(
             header = "Parameters",
             selectInput(inputId = "analysis", 
-                        label = "Analysis", 
+                        label = "Analysis",
+                        selected = "time",
                         choices = c("Pollution Rose" = "rose",
                                     "Time Plot" = "time")),
-            conditionalPanel(condition = "input.analysis == 'rose'",
-                             uiOutput(outputId = "selector"), 
-                             textOutput(outputId = "note", inline = TRUE))
+            conditionalTag(div(uiOutput(outputId = "selector"),
+                               textOutput(outputId = "note", inline = TRUE)),
+                           condition = "input.analysis == 'rose'")
         )
     )
 );
