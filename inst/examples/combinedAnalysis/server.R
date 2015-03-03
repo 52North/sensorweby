@@ -27,7 +27,7 @@ phe.wd <- phe.all[names(phe.all) == "61102 - DD"]
 flog.info("Searching for stations with wind data")
 sta.ws <- stations(endpoint, phenomenon = phe.ws)
 sta.wd <- stations(endpoint, phenomenon = phe.wd)
-sta.wind <- sta.ws[match(id(sta.ws), id(sta.wd))]
+sta.wind <- sta.ws[match(sensorweb4R::id(sta.ws), sensorweb4R::id(sta.wd))]
 
 flog.info("Building distance matrix")
 sta.all <- stations(endpoint)
@@ -37,11 +37,11 @@ rm(phe.all, sta.wd, sta.ws)
 
 findNearestStation <- function(x) {
     
-    if (id(x) %in% id(sta.wind)) {
+    if (sensorweb4R::id(x) %in% sensorweb4R::id(sta.wind)) {
         return(x)
     }
     
-    filter <- function(x) id(x) %in% id(sta.wind)
+    filter <- function(x) idsensorweb4R::id %in% sensorweb4R::id(sta.wind)
     nearest(x, sta.all, dm, filter.fun = filter, n = 1)
 }
 
@@ -52,7 +52,7 @@ requestData <- function(ts.ws, ts.wd, ts.pollutant, timespan) {
     times <- unique(sort(do.call(c, lapply(data, time))))
     values <- lapply(data, function(x) value(x)[match(times, time(x))])
     data <- data.frame(lapply(data, function(x) value(x)[match(times, time(x))]))
-    names(data) <- c("ws", "wd", id(ts.pollutant))
+    names(data) <- c("ws", "wd", sensorweb4R::id(ts.pollutant))
     data$date <- times
     data$wd <- data$wd/10
     data
@@ -87,7 +87,7 @@ shinyServer(function(input, output, session) {
         flog.info("Creating sta.near")
         ts.pollutant <- ts.pollutant()
         sta <- station(ts.pollutant)
-        validate(need(id(sta) %in% id(sta.all), "Unknown station"))
+        validate(need(sensorweb4R::id(sta) %in% sensorweb4R::id(sta.all), "Unknown station"))
         findNearestStation(sta)
     })
     

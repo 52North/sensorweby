@@ -27,11 +27,11 @@ shinyServer(function(input, output, session) {
         data <- getData(input$series, timespan = input$time)
         times <- unique(sort(do.call(c, lapply(data, time))))
         values <- lapply(data, function(x) value(x)[match(times, time(x))])
-        names(values) <- id(input$series)
+        names(values) <- sensorweb4R::id(input$series)
         values$date <- times
         df <- as.data.frame(values)
         validate(need(dim(df)[1] > 0, "No data available"))
-        timePlot(df, pollutant = id(input$series), 
+        timePlot(df, pollutant = sensorweb4R::id(input$series), 
                  name.pol = label(input$series),
                  plot.type = "h", smooth = TRUE, 
                  ci = TRUE, ylab=c())
