@@ -27,7 +27,7 @@ phe.wd <- phe.all[names(phe.all) == "61102 - DD"]
 flog.info("Searching for stations with wind data")
 sta.ws <- stations(endpoint, phenomenon = phe.ws)
 sta.wd <- stations(endpoint, phenomenon = phe.wd)
-sta.wind <- sta.ws[match(id(sta.ws), id(sta.wd))]
+sta.wind <- sta.ws[match(sensorweb4R::id(sta.ws), sensorweb4R::id(sta.wd))]
 
 flog.info("Building distance matrix")
 sta.all <- stations(endpoint)

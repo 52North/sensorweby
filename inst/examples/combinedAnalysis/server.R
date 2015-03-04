@@ -41,7 +41,7 @@ findNearestStation <- function(x) {
         return(x)
     }
     
-    filter <- function(x) sensorweb4R::id %in% sensorweb4R::id(sta.wind)
+    filter <- function(x) sensorweb4R::id(x) %in% sensorweb4R::id(sta.wind)
     nearest(x, sta.all, dm, filter.fun = filter, n = 1)
 }
 
