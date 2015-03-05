@@ -121,6 +121,18 @@ sensorweby::runExample("timePlot")
 
 The JavaScript client can be configured by placing a `www/settings.json` file inside the app directory. For configuration options refer to the documentation of the [client](https://github.com/52North/js-sensorweb-client/).
 
+### Logging
+
+To change the logging threshold prepend this to your `server.R`:
+```r
+flog.threshold(DEBUG)
+```
+
+To redirect the logging output to a file prepend this to your `server.R`:
+```r
+flog.appender(appender.file("/var/log/shiny-server/sensorweby.log"))
+```
+
 ### Input Functions
 
 #### Begin Time Input
