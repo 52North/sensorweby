@@ -4,6 +4,8 @@ A JavaScript sensor web client with graphs and analytics powered by Shiny. `sens
 
 [![Build Status](https://travis-ci.org/52North/sensorweby.png?branch=master)](https://travis-ci.org/52North/sensorweby)
 
+<script type="text/javascript" src="http://www.openhub.net/p/722170/widgets/project_thin_badge.js"></script>
+
 ## Installation
 
 The sensorweby package and the required package `sensorweb4R` are not on CRAN yet, so please download and install the package manually. The first option is using the package ``devtools``, which also works well for your own fork or development versions by other contributors.
