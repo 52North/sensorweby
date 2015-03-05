@@ -24,24 +24,12 @@
 #' @import futile.logger
 #' @import yaml
 #' @export
-run <- function(directory) {
-    options("sensorweby.settingsFile" = file.path(directory, "settings.yml"))
-
+run <- function(directory, ...) {
     futile.logger::flog.info("Starting sensorweby ...")
-
     .configureLogging()
-
     # configure app
     futile.logger::flog.info("Starting sensorweby at %s", toString(directory))
-
-    host <- getOption("shiny.host", "127.0.0.1")
-    host <- getSetting("shiny.host", host)
-    port <- getSetting("shiny.port")
-    quiet <- getSetting("shiny.quiet", FALSE)
-    display.mode <- getSetting("shiny.display-mode", "auto")
-
-    shiny::runApp(appDir = directory, port = port, host = host,
-                  quiet = quiet, display.mode = display.mode)
+    shiny::runApp(appDir = directory, ...)
 }
 
 #' @export
@@ -51,13 +39,6 @@ runExample <- function(name) {
         stop("Not a valid example")
     }
     run(dir)
-}
-
-.loadYAML <- function(file) {
-    if (is.null(file) || !file.exists(file)) {
-        return(list())
-    }
-    return(yaml::yaml.load_file(file))
 }
 
 #'
@@ -91,51 +72,6 @@ runExample <- function(name) {
         futile.logger::flog.appender(futile.logger::appender.file(file = file), "shiny")
         futile.logger::flog.appender(futile.logger::appender.file(file = file), "sensorweby")
     }
-}
-
-#'
-#' Loads the settings for the sensorweby application if and only if the option
-#' \code{sensorweby.settings} is \code{NULL}. If the settings are not yet
-#' present the default configuration is loaded and merged with a custom config
-#' file that may be set using the \code{sensorweby.settingsFile} option.
-#'
-#' @return a list containing the settings
-#'
-.loadSettings <- function() {
-    settings <- getOption("sensorweby.settings")
-    if (is.null(settings)) {
-        settings <- .loadYAML(system.file("settings.yml" , package = "sensorweby"))
-        settings <- .extend(settings, .loadYAML(getOption("sensorweby.settingsFile")))
-        options("sensorweby.settings" = settings)
-    }
-    return(settings)
-}
-
-#'
-#' Gets the setting specified by \code{key}. The key is a string containing the
-#' complete path to the setting, where properties are seperated using a \code{.}.
-#'
-#' @param key the settings key
-#' @param default an optional default value
-#'
-#' @return the key
-#' @export
-#' @examples
-#' \dontrun{
-#' getSetting("shiny.host")
-#' getSetting("timeseriesapi.filters.service")
-#' }
-getSetting <- function(key, default=NULL) {
-    path <- unlist(strsplit(key, ".", fixed=TRUE))
-    settings <- .loadSettings()
-    for (setting in path) {
-        if (setting %in% names(settings)) {
-            settings <- settings[[setting]]
-        } else {
-          return(default)
-        }
-    }
-    return(settings)
 }
 
 getLoglevelForName <- function(x) {
