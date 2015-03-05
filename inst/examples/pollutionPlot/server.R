@@ -36,16 +36,16 @@ dm <- distanceMatrix(sta.all)
 rm(phe.all, sta.wd, sta.ws)
 
 findNearestStation <- function(x) {
-    
+
     if (sensorweb4R::id(x) %in% sensorweb4R::id(sta.wind)) {
         return(x)
     }
-    
+
     filter <- function(x) sensorweb4R::id(x) %in% sensorweb4R::id(sta.wind)
     nearest(x, sta.all, dm, filter.fun = filter, n = 1)
 }
 
-requestData <- function(ts.ws, ts.wd, ts.pollutant, timespan) { 
+requestData <- function(ts.ws, ts.wd, ts.pollutant, timespan) {
     ts <- rbind2(rbind2(ts.ws, ts.wd), ts.pollutant)
     data <- getData(ts, timespan = timespan)
     times <- unique(sort(do.call(c, lapply(data, time))))
@@ -62,7 +62,7 @@ requestData <- function(ts.ws, ts.wd, ts.pollutant, timespan) {
 #              time=lubridate::new_interval(time[1], time[2]))
 
 shinyServer(function(input, output, session) {
-    
+
     output$timeseriesSelection <- renderUI({
         validate(need(length(input$series) > 0, "No timeseries selected."))
 
@@ -79,7 +79,7 @@ shinyServer(function(input, output, session) {
         validate(need(selected, "No timeseries selected."))
         fetch(fromURI(selected)$timeseries[1])
     })
-    
+
     sta.near <- reactive({
         ts.pollutant <- ts.pollutant()
         sta <- station(ts.pollutant)
@@ -94,7 +94,7 @@ shinyServer(function(input, output, session) {
         ts <- timeseries(sta.near, phenomenon = phe.ws)
         ts[station(ts) == sta.near]
     })
-    
+
     ts.wd <- reactive({
         # currently needed due to limited filtering
         # support in the old timeseries api
@@ -107,7 +107,7 @@ shinyServer(function(input, output, session) {
         validate(need(time, "No timespan selected"))
         input$time
     })
-    
+
     data <- reactive({
         time <- time()
         ts.ws <-ts.ws()
@@ -132,16 +132,16 @@ shinyServer(function(input, output, session) {
             paste0("Wind data is taken from the nearest station ", label(sta.near), ".")
         }
     })
-    
+
     output$pollutionPlot <- renderPlot({
         data <- data()
         ts.pollutant <- ts.pollutant()
-        
+
         validate(need(dim(unique(data[sensorweb4R::id(ts.pollutant)])[1]) > 1,
                       paste("Due to a strange bug in openair we can not plot",
                             "this series as is contains only a single value for",
                             "every timestamp")))
 
-        pollutionRose(data, pollutant = id(ts.pollutant))
+        pollutionRose(data, pollutant = sensorweb4R::id(ts.pollutant))
     })
 })
