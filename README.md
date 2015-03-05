@@ -4,7 +4,7 @@ A JavaScript sensor web client with graphs and analytics powered by Shiny. `sens
 
 [![Build Status](https://travis-ci.org/52North/sensorweby.png?branch=master)](https://travis-ci.org/52North/sensorweby)
 
-<script type="text/javascript" src="http://www.openhub.net/p/722170/widgets/project_thin_badge.gif"></script>
+[![OpenHUB](http://www.openhub.net/p/722170/widgets/project_thin_badge.gif)](https://www.openhub.net/p/sensorweby)
 
 ## Installation
 
