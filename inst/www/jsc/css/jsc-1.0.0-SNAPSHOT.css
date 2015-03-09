@@ -148,6 +148,7 @@ body,html,.container,.row-offcanvas,.mainPanel {
     top: 0px;
     bottom: 45px;
     width: 100%;
+    -ms-touch-action: none;
 }
 
 .timeButtons {
@@ -180,7 +181,7 @@ body,html,.container,.row-offcanvas,.mainPanel {
 
 .leftPanelButton {
     position: absolute;
-    z-index: 50;
+    z-index: 1001;
     right: 20px;
     top: 5px;
 }
@@ -340,6 +341,12 @@ a:hover {
     color: grey;
 }
 
+.backToChart{
+    margin-top: 5px;
+    cursor: pointer;
+    text-align: center;
+}
+
 @media screen and (max-width: 767px) {
     .phenomena.active {
         background: rgba(217, 217, 217, 0.9);
@@ -405,7 +412,7 @@ a:hover {
 
 .chart-annotation {
     position: absolute;
-    bottom: 25px;
+    bottom: 40px;
     right: 15px;
     color: #d43f3a;
 }
@@ -472,6 +479,11 @@ a:hover {
     text-align: center;
 }
 
+#collapseSettings .btn{
+    word-break: break-word;
+    white-space: normal;
+}
+
 .resetStatus,
 .saveStatus {
     margin-bottom: 5px;
@@ -493,20 +505,20 @@ a:hover {
     margin: 5px;
 }
 
-.dropdown-menu {
+.language-chooser-box .dropdown-menu {
     width: 100%;
 }
 
-.dropdown-menu li {
+.language-chooser-box .dropdown-menu li {
     cursor: pointer;
     margin-right: 4px;
 }
 
-.dropdown-menu li:hover {
+.language-chooser-box .dropdown-menu li:hover {
     background-color: #3276b1;
 }
 
-.dropdown-menu img {
+.language-chooser-box .dropdown-menu img {
     margin-top: 4px;
 }
 /**
@@ -619,6 +631,10 @@ a:hover {
 
 .selectionListContent .panel-body div {
     cursor: pointer;
+}
+
+.selectionListContent .loading.loaded{
+    display: none;
 }/**
  * Copyright (C) 2014-2014 52°North Initiative for Geospatial Open Source
  * Software GmbH
