@@ -203,9 +203,10 @@ swcPage <- function(...,
                     author=NULL,
                     description=NULL,
                     debug=FALSE,
+                    version = "1.0.0-SNAPSHOT",
                     caption=c(de = "Analyse", en = "Analysis")) {
 
-
+    
     addResourcePath("sensorweby", system.file("www/sensorweby", package="sensorweby"))
 
     for (name in c("css", "fonts", "images", "js", "templates")) {
@@ -220,16 +221,16 @@ swcPage <- function(...,
         if (!is.null(author)) tags$meta(name="author", content=author),
         tags$meta("http-equiv"="Content-Type", content="text/html; charset=utf-8"),
         tags$meta("http-equiv"="X-UA-Compatible", content="IE=edge"),
-        tags$link(rel="stylesheet", type="text/css", href="css/jsc-0.2.0.deps.min.css"),
-        tags$link(rel="stylesheet", type="text/css", href="css/jsc-0.2.0.min.css"),
+        tags$link(rel="stylesheet", type="text/css", href=sprintf("css/jsc-%s.deps.min.css", version)),
+        tags$link(rel="stylesheet", type="text/css", href=sprintf("css/jsc-%s.min.css", version)),
         HTML('<!--[if lt IE 9]>'),
         tags$script(src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"),
         tags$script(src="https://oss.maxcdn.com/libs/respond.js/1.3.0/respond.min.js"),
         HTML('<![endif]-->'),
         tags$script(sprintf("var DEBUG = !!%i;", debug)),
         tags$script(src="sensorweby/isTouchOrIsMobile.js"),
-        tags$script(src=sprintf("js/jsc-0.2.0.deps%s", ext)),
-        tags$script(src=sprintf("js/jsc-0.2.0%s", ext)),
+        tags$script(src=sprintf("js/jsc-%s.deps%s",version, ext)),
+        tags$script(src=sprintf("js/jsc-%s%s",version, ext)),
         swcI18N(names(caption), "main.analysisView", caption),
         tags$script(src="sensorweby/sensorweby.js")
     )
