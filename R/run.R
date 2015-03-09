@@ -24,9 +24,9 @@
 #' @import futile.logger
 #' @import yaml
 #' @export
-run <- function(directory, ...) {
+run <- function(directory, logFile = NULL, ...) {
     futile.logger::flog.info("Starting sensorweby ...")
-    .configureLogging()
+    .configureLogging(file = logFile)
     # configure app
     futile.logger::flog.info("Starting sensorweby at %s", toString(directory))
     shiny::runApp(appDir = directory, ...)
@@ -60,12 +60,10 @@ runExample <- function(name) {
     return(x)
 }
 
-.configureLogging <- function() {
+.configureLogging <- function(file = NULL) {
     # configure logging
     futile.logger::flog.layout(futile.logger::layout.format("[~l] [~t] [~n.~f] ~m"))
-    futile.logger::flog.threshold(getLoglevelForName(getSetting("logging.level", "info")))
-    file <- getSetting("logging.file")
-    if( !is.null(file)) {
+    if(!is.null(file)) {
         futile.logger::flog.info("Logging to file %s with level %s", file,
                                  futile.logger::flog.logger()$threshold)
         futile.logger::flog.appender(futile.logger::appender.file(file = file))
