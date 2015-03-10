@@ -19,7 +19,7 @@ library(lubridate)
 library(futile.logger)
 
 shinyServer(function(input, output, session) {
-    output$timePlot<- renderPlot({
+    output$scatterPlot<- renderPlot({
         validate(
             need(length(input$series) > 0, 'No Timeseries selected'),
             need(input$time, "No timespan selected")
