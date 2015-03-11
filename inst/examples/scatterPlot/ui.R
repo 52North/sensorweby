@@ -17,11 +17,12 @@ library(sensorweby)
 
 shinyUI(  
     swcPage( 
-        title="Sensorweby scatterplot",
-        caption = c(en = "scatterplot",
+        title="Sensorweby Scatterplot",
+        caption = c(en = "Scatterplot",
                     de = "Scatterplot"),
         swcIntervalInput("time"),
         swcTimeseriesInput("series"),
         swcFullPanel(plotOutput("scatterPlot", width="100%", height="100%"))
     )
 );
+

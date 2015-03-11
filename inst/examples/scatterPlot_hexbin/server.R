@@ -31,7 +31,6 @@ shinyServer(function(input, output, session) {
         values$date <- times
         df <- as.data.frame(values)
         validate(need(dim(df)[1] > 0, "No data available"))
-        
-        scatterPlot(sensorweb4R::id(input$series)[1], sensorweb4R::id(input$series)[2], linear=TRUE)
+        scatterPlot(df, x = sensorweb4R::id(input$series)[1], y = sensorweb4R::id(input$series)[2], xlab = label(input$series)[1], ylab = label(input$series)[2], method = "hexbin", col= "jet")
     })
 })
