@@ -4,7 +4,7 @@
 \alias{run}
 \title{Run shiny sensor web client}
 \usage{
-run(directory, ...)
+run(directory, logFile = NULL, ...)
 }
 \description{
 \code{run} starts the Shiny application with an advanced JavaScript sensor web client

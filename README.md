@@ -86,9 +86,14 @@ To close the client interrupt R, usually by hitting Esc or Ctrl + C.
 
 For more information about running Shiny apps on the server see the [Shiny documentation](http://shiny.rstudio.com/).
 
+
+## User Documentation
+
+The package provides examples and you can build the function reference. The package does not provide demos or a Vignette (yet).
+
 ### Examples
 
-The package ships with [various example applications](https://github.com/52North/sensorweby/tree/master/inst/examples). To run an example, install and load the package (see above), then execute one of the following calls.
+The package ships with [various example applications](https://github.com/52North/sensorweby/tree/master/inst/examples). To run an example, install and load the package (see above), then execute one of the following calls to run the respective example. There might be more examples as subdirectories in `inst/examples`, just give them a try by running ``sensorweby::runExample("<name of the subdirectory>")``.
 
 #### Basic
 
@@ -103,7 +108,6 @@ sensorweby::runExample("basic")
 
 Example for a wind rose pollution plot powered by `openair`. Select an station which provides wind data on the map, then switch to the analysis page to see a [wind rose/pollution rose](http://www.openair-project.org/Examples/WindPollutionRoses.aspx).
 
-
 ```r
 sensorweby::runExample("pollutionPlot")
 
@@ -113,11 +117,19 @@ sensorweby::runExample("pollutionPlot")
 
 Plot the currently select time series with an advanced plotting function from the package `openair` (`openair::timePlot`). Select any phenomenon and time series from the map and specify the time span of interest. Then click on the "Analysis" button to see the same data plotted by `R`.
 
-
 ```r
 sensorweby::runExample("timePlot")
 
 ```
+
+### Reference manual
+
+When installed from source or GitHub, run the command [Rd2pdf](http://cran.r-project.org/doc/manuals/R-exts.html#index-R-CMD-Rd2pdf) on the regular command line from the parent directory of the package. This will create the reference manual, which describes all functions in the package:
+
+```
+R CMD Rd2pdf sensorweby
+```
+
 
 ## Configuration
 
@@ -305,10 +317,10 @@ swcPage(
 
 ```
 
+
 ## Developer Documentation
 
 ### Change and test code
-
 
 ```r
 require(devtools)
