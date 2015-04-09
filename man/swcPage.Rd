@@ -5,7 +5,8 @@
 \title{JavaScript SensorWebClient Page Definition}
 \usage{
 swcPage(..., title = NULL, author = NULL, description = NULL,
-  debug = FALSE, caption = c(de = "Analyse", en = "Analysis"))
+  debug = FALSE, version = "1.0.0-SNAPSHOT", caption = c(de = "Analyse",
+  en = "Analysis"))
 }
 \arguments{
 \item{...}{Unnamed items that comprise this list of tags.}
