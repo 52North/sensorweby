@@ -240,22 +240,22 @@ swcPage <- function(...,
     tags$html(lang="en", head, body)
 }
 
-.navbarBtn <- function(href, icon, caption=NULL){
-    tags$a(class="btn btn-default navbar-btn button-right",
-           "data-target"=href,
-           href=href,
-           type="button",
-           if (!is.null(icon)) tags$span(class=paste("glyphicon", icon)),
-           if (!is.null(caption)) tags$span(class="buttonCaption", caption))
+.navbarBtn <- function(href, icon, caption=NULL, additionalClasses=""){
+    tags$a(class = paste("btn btn-default navbar-btn button-right", additionalClasses),
+           "data-target" = href,
+           href = href,
+           type = "button",
+           if (!is.null(icon)) tags$span(class = paste("glyphicon", icon)),
+           if (!is.null(caption)) tags$span(class = "buttonCaption", caption))
 }
 
 .navbar <- function(caption, icon, ...) {
-    tags$div(class="navbar navbar-fixed-top",
-             role="navigation",
-             tags$div(class="container-fluid",
-                      tags$div(class="navbar-header analysis",
-                               tags$span(class="navbar-brand",
-                                         tags$span(class=paste("glyphicon", icon)),
+    tags$div(class = "navbar navbar-fixed-top",
+             role = "navigation",
+             tags$div(class = "container-fluid",
+                      tags$div(class = "navbar-header analysis",
+                               tags$span(class = "navbar-brand",
+                                         tags$span(class = paste("glyphicon", icon)),
                                          tags$span(caption)),
                                list(...))))
 }
@@ -264,10 +264,12 @@ swcPage <- function(...,
     chartView <- .navbarBtn("#chart", "glyphicon-stats", "{{_i}}main.chartView{{/i}}")
     mapView <- .navbarBtn("#map", "glyphicon-globe", "{{_i}}main.mapView{{/i}}")
     settings <- .navbarBtn("#settings", "glyphicon-cog", "{{_i}}main.settings{{/i}}")
+    favorites <- .navbarBtn("#favorites", "glyphicon-star", "{{_i}}main.favoriteView{{/i}}", 
+                            additionalClasses = "favoriteButton")
     tour <- .navbarBtn("#tour", "glyphicon-question-sign")
 
     navbar <- .navbar("{{_i}}main.analysisView{{/i}}", "glyphicon-stats",
-                        chartView, mapView, settings, tour)
+                        chartView, mapView, settings, tour, favorites)
     tags$div(class="swc-page",
              id="analysis-page",
              navbar,
