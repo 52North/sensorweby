@@ -203,7 +203,7 @@ swcPage <- function(...,
                     author=NULL,
                     description=NULL,
                     debug=FALSE,
-                    version = "1.0.0-SNAPSHOT",
+                    version = "1.0.0",
                     caption=c(de = "Analyse", en = "Analysis")) {
 
     
@@ -212,9 +212,9 @@ swcPage <- function(...,
     for (name in c("css", "fonts", "images", "js", "templates")) {
         addResourcePath(name, system.file(paste0("www/jsc/", name), package="sensorweby"))
     }
-
+    
     ext <- ifelse(debug, ".js", ".min.js")
-
+    
     head <- tags$head(
         if (!is.null(title)) tags$title(title),
         if (!is.null(description)) tags$meta(name="description", content=description),
@@ -234,7 +234,7 @@ swcPage <- function(...,
         swcI18N(names(caption), "main.analysisView", caption),
         tags$script(src="sensorweby/sensorweby.js")
     )
-
+    
     body <- tags$body(tags$div(class="jsc-main swc-main", .analysisPage(...)))
     tags$html(lang="en", head, body)
 }
