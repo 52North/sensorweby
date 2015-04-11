@@ -39,9 +39,12 @@ shinyUI(
       swcTimeBeginInput("begin"),
       swcTimeEndInput("end"),
       swcTimeseriesInput("series"),
+      swcTimeseriesColorInput("colors"),
 
       tags$label(class="control-label", "Time Series"),
       htmlOutput("timeseries"),
+      tags$label(class="control-label", "Colors"),
+      htmlOutput("colorsout"),
 
       tags$label(class="control-label", "Begin Time"),
       htmlOutput("begin"),
