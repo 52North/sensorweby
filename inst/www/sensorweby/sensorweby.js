@@ -49,6 +49,15 @@ $(function() {
       return timeseries;
     };
 
+    ShinyController.prototype.getColors = function() {
+      var colors = [];
+      var ts = TimeSeriesController.getTimeseriesCollection();
+      $.each(ts, function(id, ts) {
+        colors.push(ts.getStyle().getColor());
+      });
+      return colors;
+    };
+
     ShinyController.prototype._bind = function() {
       EventManager.subscribe("time:end:change", $.proxy(this, "_onTimeEndChange"));
       EventManager.subscribe("time:start:change", $.proxy(this, "_onTimeStartChange"));
@@ -56,6 +65,7 @@ $(function() {
       EventManager.subscribe("timeseries:add", $.proxy(this, "_onTimeSeriesAdd"));
       EventManager.subscribe("timeseries:remove", $.proxy(this, "_onTimeSeriesRemove"));
       EventManager.subscribe("timeseries:removeAll", $.proxy(this, "_onTimeSeriesRemoveAll"));
+      EventManager.subscribe("timeseries:changeStyle", $.proxy(this, "_onTimeSeriesStyleChange"));
     };
 
     ShinyController.prototype._onTimeEndChange = function(e, end) {
@@ -90,6 +100,10 @@ $(function() {
       }
     };
 
+    ShinyController.prototype._onTimeSeriesStyleChange = function() {
+      this.trigger("change:timeseries:style");
+    };
+
     ShinyController.prototype._onTimeExtentChange = function(e, extent) {
       this._onTimeStartChange(e, extent.from);
       this._onTimeEndChange(e, extent.till);
@@ -97,14 +111,17 @@ $(function() {
 
     ShinyController.prototype._onTimeSeriesAdd = function() {
       this.trigger("change:timeseries");
+      this.trigger("change:timeseries:style");
     };
 
     ShinyController.prototype._onTimeSeriesRemove = function() {
       this.trigger("change:timeseries");
+      this.trigger("change:timeseries:style");
     };
 
     ShinyController.prototype._onTimeSeriesRemoveAll = function() {
       this.trigger("change:timeseries");
+      this.trigger("change:timeseries:style");
     };
 
     return ShinyController;
@@ -231,6 +248,25 @@ $(function() {
     return TimeseriesInputBinding;
   })();
 
+  var TimeseriesColorInputBinding = (function() {
+    function TimeseriesColorInputBinding(ctrl) {
+        SWCInputBinding.call(this, ctrl, "input.jsc-timeseries-colors", "change:timeseries:style");
+    }
+
+    TimeseriesColorInputBinding.prototype = Object.create(SWCInputBinding.prototype);
+
+    TimeseriesColorInputBinding.prototype.getValue = function(el) {
+      return this.ctrl.getColors();
+    };
+
+    TimeseriesColorInputBinding.prototype.getType = function() {
+      return 'n52.timeseries.colors';
+    };
+
+    return TimeseriesColorInputBinding;
+  })();
+
+
   var TimeIntervalInputBinding = (function() {
     function TimeIntervalInputBinding(ctrl) {
         SWCInputBinding.call(this, ctrl, "input.jsc-time-interval",
@@ -256,10 +292,11 @@ $(function() {
   })();
 
   var ctrl = new ShinyController();
-  Shiny.inputBindings.register(new TimeStartInputBinding(ctrl),    "n52.swc.time-start");
-  Shiny.inputBindings.register(new TimeEndInputBinding(ctrl),      "n52.swc.time-end");
-  Shiny.inputBindings.register(new TimeseriesInputBinding(ctrl),   "n52.swc.time-series");
-  Shiny.inputBindings.register(new TimeIntervalInputBinding(ctrl), "n52.swc.time-interval");
+  Shiny.inputBindings.register(new TimeStartInputBinding(ctrl),       "n52.swc.time-start");
+  Shiny.inputBindings.register(new TimeEndInputBinding(ctrl),         "n52.swc.time-end");
+  Shiny.inputBindings.register(new TimeseriesInputBinding(ctrl),      "n52.swc.time-series");
+  Shiny.inputBindings.register(new TimeIntervalInputBinding(ctrl),    "n52.swc.time-interval");
+  Shiny.inputBindings.register(new TimeseriesColorInputBinding(ctrl), "n52.swc.time-series-colors");
 
   (function() {
     Pages.navigateToStatistics = function() {
