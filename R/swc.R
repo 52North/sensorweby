@@ -62,6 +62,22 @@ swcTimeseriesInput <- function(id) {
   tags$input(class="jsc-timeseries", type="hidden", "data-input-id"=id)
 }
 
+#' Timeseries Color Input
+#'
+#' `swcTimeseriesColorInput` adds a new reactive input that contains the colors
+#' of the currently selected time series of the JavaScript SensorWebClient.
+#' Returns a HTML `input` tag.
+#' @param id the id of the input
+#' @return a HTML \code{input} tag
+#' @export
+#' @examples
+#' \dontrun{
+#'  swcTimeseriesColorInput('colors')
+#' }
+swcTimeseriesColorInput <- function(id) {
+  tags$input(class="jsc-timeseries-colors", type="hidden", "data-input-id"=id)
+}
+
 #' Time Interval Input
 #'
 #' \code{swcIntervalInput} adds a new reactive input that contains the
@@ -206,15 +222,15 @@ swcPage <- function(...,
                     version = "1.0.0",
                     caption=c(de = "Analyse", en = "Analysis")) {
 
-    
+
     addResourcePath("sensorweby", system.file("www/sensorweby", package="sensorweby"))
 
     for (name in c("css", "fonts", "images", "js", "templates")) {
         addResourcePath(name, system.file(paste0("www/jsc/", name), package="sensorweby"))
     }
-    
+
     ext <- ifelse(debug, ".js", ".min.js")
-    
+
     head <- tags$head(
         if (!is.null(title)) tags$title(title),
         if (!is.null(description)) tags$meta(name="description", content=description),
@@ -235,7 +251,7 @@ swcPage <- function(...,
         swcI18N(names(caption), "main.analysisView", caption),
         tags$script(src="sensorweby/sensorweby.js")
     )
-    
+
     body <- tags$body(tags$div(class="jsc-main swc-main", .analysisPage(...)))
     tags$html(lang="en", head, body)
 }
@@ -264,7 +280,7 @@ swcPage <- function(...,
     chartView <- .navbarBtn("#chart", "glyphicon-stats", "{{_i}}main.chartView{{/i}}")
     mapView <- .navbarBtn("#map", "glyphicon-globe", "{{_i}}main.mapView{{/i}}")
     settings <- .navbarBtn("#settings", "glyphicon-cog", "{{_i}}main.settings{{/i}}")
-    favorites <- .navbarBtn("#favorites", "glyphicon-star", "{{_i}}main.favoriteView{{/i}}", 
+    favorites <- .navbarBtn("#favorites", "glyphicon-star", "{{_i}}main.favoriteView{{/i}}",
                             additionalClasses = "favoriteButton")
     tour <- .navbarBtn("#tour", "glyphicon-question-sign")
 
