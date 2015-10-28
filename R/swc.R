@@ -203,7 +203,7 @@ swcPage <- function(...,
                     author=NULL,
                     description=NULL,
                     debug=FALSE,
-                    version = "1.0.0-SNAPSHOT",
+                    version = "1.0.0",
                     caption=c(de = "Analyse", en = "Analysis")) {
 
     
@@ -212,15 +212,16 @@ swcPage <- function(...,
     for (name in c("css", "fonts", "images", "js", "templates")) {
         addResourcePath(name, system.file(paste0("www/jsc/", name), package="sensorweby"))
     }
-
+    
     ext <- ifelse(debug, ".js", ".min.js")
-
+    
     head <- tags$head(
         if (!is.null(title)) tags$title(title),
         if (!is.null(description)) tags$meta(name="description", content=description),
         if (!is.null(author)) tags$meta(name="author", content=author),
-        tags$meta("http-equiv"="Content-Type", content="text/html; charset=utf-8"),
-        tags$meta("http-equiv"="X-UA-Compatible", content="IE=edge"),
+        tags$meta("charset" = "utf8"),
+        tags$meta("http-equiv" = "X-UA-Compatible", content = "IE=edge"),
+        tags$meta(name="viewport", content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no, minimal-ui"),
         tags$link(rel="stylesheet", type="text/css", href=sprintf("css/jsc-%s.deps.min.css", version)),
         tags$link(rel="stylesheet", type="text/css", href=sprintf("css/jsc-%s.min.css", version)),
         HTML('<!--[if lt IE 9]>'),
@@ -234,27 +235,27 @@ swcPage <- function(...,
         swcI18N(names(caption), "main.analysisView", caption),
         tags$script(src="sensorweby/sensorweby.js")
     )
-
+    
     body <- tags$body(tags$div(class="jsc-main swc-main", .analysisPage(...)))
     tags$html(lang="en", head, body)
 }
 
-.navbarBtn <- function(href, icon, caption=NULL){
-    tags$a(class="btn btn-default navbar-btn button-right",
-           "data-target"=href,
-           href=href,
-           type="button",
-           if (!is.null(icon)) tags$span(class=paste("glyphicon", icon)),
-           if (!is.null(caption)) tags$span(class="buttonCaption", caption))
+.navbarBtn <- function(href, icon, caption=NULL, additionalClasses=""){
+    tags$a(class = paste("btn btn-default navbar-btn button-right", additionalClasses),
+           "data-target" = href,
+           href = href,
+           type = "button",
+           if (!is.null(icon)) tags$span(class = paste("glyphicon", icon)),
+           if (!is.null(caption)) tags$span(class = "buttonCaption", caption))
 }
 
 .navbar <- function(caption, icon, ...) {
-    tags$div(class="navbar navbar-fixed-top",
-             role="navigation",
-             tags$div(class="container-fluid",
-                      tags$div(class="navbar-header analysis",
-                               tags$span(class="navbar-brand",
-                                         tags$span(class=paste("glyphicon", icon)),
+    tags$div(class = "navbar navbar-fixed-top",
+             role = "navigation",
+             tags$div(class = "container-fluid",
+                      tags$div(class = "navbar-header analysis",
+                               tags$span(class = "navbar-brand",
+                                         tags$span(class = paste("glyphicon", icon)),
                                          tags$span(caption)),
                                list(...))))
 }
@@ -263,10 +264,12 @@ swcPage <- function(...,
     chartView <- .navbarBtn("#chart", "glyphicon-stats", "{{_i}}main.chartView{{/i}}")
     mapView <- .navbarBtn("#map", "glyphicon-globe", "{{_i}}main.mapView{{/i}}")
     settings <- .navbarBtn("#settings", "glyphicon-cog", "{{_i}}main.settings{{/i}}")
+    favorites <- .navbarBtn("#favorites", "glyphicon-star", "{{_i}}main.favoriteView{{/i}}", 
+                            additionalClasses = "favoriteButton")
     tour <- .navbarBtn("#tour", "glyphicon-question-sign")
 
     navbar <- .navbar("{{_i}}main.analysisView{{/i}}", "glyphicon-stats",
-                        chartView, mapView, settings, tour)
+                        chartView, mapView, settings, tour, favorites)
     tags$div(class="swc-page",
              id="analysis-page",
              navbar,

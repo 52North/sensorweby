@@ -8,7 +8,8 @@ window.isMobile = (function(){
 window.isTouchDevice = (function() {
     // TODO switch to Modenizr for reliable test?
     // TODO good article for touch AND mouse: http://www.html5rocks.com/en/mobile/touchandmouse/
-    var check = window.navigator.msMaxTouchPoints // IE 10
+    var check = window.navigator.MaxTouchPoints
+        || window.navigator.msMaxTouchPoints // IE 10
         || 'ontouchstart' in document.documentElement;
     return function() { return check; };
 })();

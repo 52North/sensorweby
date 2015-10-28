@@ -263,6 +263,7 @@ $(function() {
 
   (function() {
     Pages.navigateToStatistics = function() {
+      ChartController.visible = false;
       Pages.navigateToPage("#analysis-page");
       location.href = "#analysis";
       Pages.togglePhenomenon(false);
