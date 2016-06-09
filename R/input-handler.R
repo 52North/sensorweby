@@ -10,16 +10,16 @@
 
 
 .timeseriesInputHandler <- function(x, shinysession, name) {
-    
+
     flog.info("Parsing timeseries:\n\t%s", paste(x, collapse="\n\t"))
-    
-    if (is.null(x) || is.na(x) || length(x) == 0) 
+
+    if (is.null(x) || is.na(x) || length(x) == 0)
         sensorweb4R::Timeseries()
-    else 
+    else
         sensorweb4R::fromURI(x)$timeseries
 }
 
 .timeIntervalInputHandler <- function(x, shinysession, name) {
     x <- .timeInputHandler(x, shinysession, name)
-    lubridate::new_interval(x[1], x[2])
+    lubridate::interval(x[1], x[2])
 }

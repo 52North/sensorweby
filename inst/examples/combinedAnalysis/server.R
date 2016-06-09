@@ -60,7 +60,7 @@ requestData <- function(ts.ws, ts.wd, ts.pollutant, timespan) {
 
 #time <- strptime(c("2015-01-17T23:00:00Z","2015-02-26T22:59:59Z"), "%Y-%m-%dT%H:%M:%OS", tz = "UTC")
 #input <- list(series=fetch(Timeseries(id="ts_6b4312a023c204544035387722ca8794", endpoint=endpoint)),
-#              time=lubridate::new_interval(time[1], time[2]))
+#              time=lubridate::interval(time[1], time[2]))
 
 shinyServer(function(input, output, session) {
 
