@@ -6903,16 +6903,16 @@ var Settings = {
     restApiUrls: {
 //		'http://192.168.1.135:8080/sensorwebclient-webapp/api/v1/' : 'localhost'
 //		'http://localhost:8090/sensorwebclient-webapp-3.3.0-SNAPSHOT/api/v1/' : 'localhost'
-        // 'http://sensorweb.demo.52north.org/sensorwebclient-webapp-stable/api/v1/': '52nSensorweb',
-        // 'http://sosrest.irceline.be/api/v1/': 'irceline',
-        // 'http://www.fluggs.de/sos2/api/v1/': 'fluggs',
-        // 'http://sensors.geonovum.nl/sos/api/v1/': 'geonovum',
-        'http://geo.irceline.be/sos/api/v1/': 'irceline'
+        'http://sensorweb.demo.52north.org/sensorwebclient-webapp-stable/api/v1/': '52nSensorweb',
+        'http://sosrest.irceline.be/api/v1/': 'irceline',
+        'http://geo.irceline.be/sos/api/v1/': 'irceline2',
+        'http://www.fluggs.de/sos2/api/v1/': 'fluggs',
+        'http://sensors.geonovum.nl/sos/api/v1/': 'geonovum'
     },
     // default selected provider
     defaultProvider: {
-        serviceID: '1',
-        apiUrl: 'http://geo.irceline.be/sos/api/v1/'
+        serviceID: 'srv_738111ed219f738cfc85be0c8d87843c',
+        apiUrl: 'http://sensorweb.demo.52north.org/sensorwebclient-webapp-stable/api/v1/'
     },
     // default setting for clustering stations
     clusterStations: true,
