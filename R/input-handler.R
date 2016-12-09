@@ -10,14 +10,19 @@
 
 
 .timeseriesInputHandler <- function(x, shinysession, name) {
-    
+
     flog.info("Parsing timeseries:\n\t%s", paste(x, collapse="\n\t"))
-    
-    if (is.null(x) || is.na(x) || length(x) == 0) 
+
+    if (is.null(x) || is.na(x) || length(x) == 0)
         sensorweb4R::Timeseries()
-    else 
+    else
         sensorweb4R::fromURI(x)$timeseries
 }
+
+.timeseriesColorInputHandler <- function(x, shinysession, name) {
+    x
+}
+
 
 .timeIntervalInputHandler <- function(x, shinysession, name) {
     x <- .timeInputHandler(x, shinysession, name)

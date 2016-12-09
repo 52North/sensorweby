@@ -36,6 +36,10 @@ shinyServer(func = function(input, output, session) {
         formatTime(input$end);
     });
 
+    output$colorsout <- renderUI({
+        tags$ul(lapply(input$colors, tags$li))
+    });
+
     output$timeseries <- renderUI({
         if (length(input$series) == 0) "NA"
         else tags$ul(lapply(input$series, tags$li))

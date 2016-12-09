@@ -16,11 +16,13 @@
 .onLoad <- function(libname, pkgname) {
     shiny::registerInputHandler("n52.datetime", .timeInputHandler);
     shiny::registerInputHandler("n52.timeseries", .timeseriesInputHandler)
+    shiny::registerInputHandler("n52.timeseries.colors", .timeseriesColorInputHandler)
     shiny::registerInputHandler("n52.timeinterval", .timeIntervalInputHandler)
 }
 
 .onUnload <- function(libpath) {
     shiny::removeInputHandler("n52.datetime")
     shiny::removeInputHandler("n52.timeseries")
+    shiny::removeInputHandler("n52.timeseries.colors")
     shiny::removeInputHandler("n52.timeinterval")
 }
