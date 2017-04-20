@@ -26,5 +26,5 @@
 
 .timeIntervalInputHandler <- function(x, shinysession, name) {
     x <- .timeInputHandler(x, shinysession, name)
-    lubridate::new_interval(x[1], x[2])
+    lubridate::interval(x[1], x[2])
 }

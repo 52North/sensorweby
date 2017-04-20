@@ -1,13 +1,13 @@
 {
 
     "restApiUrls": {
-        "http://geo.irceline.be/sos/api/v1/": "irceline",
+        "http://sosrest.irceline.be/api/v1/": "irceline",
 	"http://www57.lamp.le.ac.uk/52n-sos-webapp/api/v1/": "uol",
 	"http://sensors.geonovum.nl/sos/api/v1/": "RIVM"
     },
     "defaultProvider": {
-        "serviceID": "1",
-        "apiUrl": "http://geo.irceline.be/sos/api/v1/"
+        "serviceID": "srv_6d9ccea8d609ecb74d4a512922bb7cee",
+        "apiUrl": "http://sosrest.irceline.be/api/v1/"
     },
    "generalizeData": false,
    "clusterStations": false
