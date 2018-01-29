@@ -370,7 +370,7 @@ Add an issue/comment on [the GitHub repository](https://github.com/52North/senso
 
 ## License
 
-This R extension package is licensed under [Apache License 2](https://www.tldrlegal.com/l/apache2).
+This R extension package is licensed under [GPL-3.0](https://www.gnu.org/licenses/gpl-3.0.txt).
 
 Documentation (namely the vignettes) are published under [CC BY 4.0](http://creativecommons.org/licenses/by/4.0/).
 
