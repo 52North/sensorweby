@@ -1,14 +1,14 @@
 Package: sensorweby
-Title: JS Sensor Web Client with Advanced Analytics
+Description: JS Sensor Web Client with Advanced Analytics
+Title: An JS Sensor Web Client with Advanced Analytics through R and Shiny
+Encoding: UTF-8
 Version: 0.1
 Authors@R: c(person("Christian", "Autermann", email =
     "c.autermann@52north.org", role = c("aut")), person("Daniel", "Nuest",
     email = "d.nuest@52north.org", role = c("aut", "cre")),
     person("52\u00b0North", email = "info@52north.org", role = c("cph"),
     comment = "This package is part of a managed codebase.") )
-AuthorUrl: http://52north.org/
-DisplayMode: normal
-Type: Shiny
+AuthorURL: https://52north.org
 Tags: sensor web, sensor data, sensors, analysis, processing
 Description: A JavaScript sensor web client with graphs and analytics powered
     by Shiny.
