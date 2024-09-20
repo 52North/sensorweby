@@ -1,10 +1,10 @@
+# ARCHIVED
+
+This project is no longer maintained and will not receive any further updates. If you plan to continue using it, please be aware that future security issues will not be addressed.
+
 # sensorweby
 
 A JavaScript sensor web client with graphs and analytics powered by Shiny. `sensorweby` is an R extension package building on [Shiny](http://www.rstudio.com/shiny/) and the [52°North JavaScript SOS client](https://github.com/52North/js-sensorweb-client/).
-
-[![Build Status](https://travis-ci.org/52North/sensorweby.png?branch=master)](https://travis-ci.org/52North/sensorweby)
-
-[![OpenHUB](http://www.openhub.net/p/722170/widgets/project_thin_badge.gif)](https://www.openhub.net/p/sensorweby)
 
 ## Installation
 
